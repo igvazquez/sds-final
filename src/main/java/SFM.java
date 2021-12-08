@@ -1,5 +1,6 @@
 import lombok.Data;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
@@ -40,6 +41,13 @@ public class SFM {
         final var a = new double[2];
         a[0] = (Fg[0] + Fs[0] + Fd[0])/p.getMass();
         a[1] = (Fg[1] + Fs[1] + Fd[1])/p.getMass();
+        return a;
+    }
+
+    public double[] getForce(final Particle p, final List<Particle> neighbours){
+        var a = getAcceleration(p, neighbours);
+        a[0] = p.getMass()*a[0];
+        a[1] = p.getMass()*a[1];
         return a;
     }
 

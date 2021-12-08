@@ -58,4 +58,26 @@ public class Particle {
         double d = Math.hypot(target[0] - x, target[1] - y);
         return new double[]{(target[0] - x)/d, (target[1] - y)/d};
     }
+
+    public double calculateDistance(Particle p, double L, boolean periodicOutline) {
+        double x = distanceFromAxis(this.x, p.getX(), L, periodicOutline);
+        double y = distanceFromAxis(this.y, p.getY(), L, periodicOutline);
+
+        return Math.sqrt(x*x + y*y) - this.radius - p.getRadius();
+    }
+
+    private double distanceFromAxis(double ax1, double ax2, double L, boolean periodicOutline){
+        double distance = Math.abs(ax1 - ax2);
+
+        if (periodicOutline){
+            if(distance > L/2){
+                distance = L - distance;
+            }
+        }
+        return distance;
+    }
+
+    public boolean collides(final Particle particle) {
+        return distanceTo(particle) <= 0;
+    }
 }
