@@ -57,18 +57,4 @@ public class Verlet {
                                  final double dt, final double mass){
         return r0 - dt*v0 + (dt*dt/(2*mass))*f0;
     }
-
-    @Data
-    public static class State {
-
-        private final double r;
-        private final double v;
-        private final double dt;
-
-        public State(final double r, final double v, final double dt) {
-            this.r = r;
-            this.v = v;
-            this.dt = dt;
-        }
-    }
 }

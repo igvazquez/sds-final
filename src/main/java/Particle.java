@@ -1,5 +1,8 @@
 import lombok.Data;
 
+import java.util.List;
+import java.util.Objects;
+
 @Data
 public class Particle {
 
@@ -12,6 +15,7 @@ public class Particle {
     double[] target;
     double mass;
     double radius;
+    Verlet integrator;
 
     public Particle(int id, double x, double y, double vx, double vy,
                     double vd, double[] target, double mass, double radius) {
@@ -79,5 +83,27 @@ public class Particle {
 
     public boolean collides(final Particle particle) {
         return distanceTo(particle) <= 0;
+    }
+
+    public void advanceParticle(double t, final double dt, final List<Particle> neighbours) {
+        var newState = integrator.step(t, dt, neighbours);
+
+        x = newState[0].getR();
+        vx = newState[0].getV();
+        y = newState[1].getR();
+        vy = newState[1].getV();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Particle)) return false;
+        Particle particle = (Particle) o;
+        return id == particle.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

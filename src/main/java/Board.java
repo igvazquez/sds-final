@@ -215,7 +215,8 @@ public class Board {
             newR    = minR;
         }
 
-        return new Particle(p.getId(), p.getX() + newVx*dt, p.getY() + newVy*dt, newVx, newVy, p.getMass(), newR);
+        return null;
+//        return new Particle(p.getId(), p.getX() + newVx*dt, p.getY() + newVy*dt, newVx, newVy, p.getMass(), newR);
     }
 
     private double nextTargetX(final double x, final boolean escaped) {

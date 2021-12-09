@@ -27,7 +27,7 @@ public class SFM {
 
         Fd = calculateDesireForce(p);
 
-        neighbours.remove(p);
+//        neighbours.remove(p);
         for(final Particle other : neighbours){
             var fg = calculateGranularForce(p, other);
             var fs = calculateSocialForce(p, other);
@@ -55,11 +55,11 @@ public class SFM {
         var nij = p.getNij(other);
         var tij = p.getTangentVector(other);
         var dvt = (other.getVx()-p.getVx())*tij[0] + (other.getVy()-p.getVy())*tij[1];
-        var g = p.getRadius() + other.getRadius() > p.centerDistanceTo(other) ?
+        var g = p.centerDistanceTo(other) > p.getRadius() + other.getRadius() ?
                 0 : p.getRadius() + other.getRadius() - p.centerDistanceTo(other);
 
         double[] fn = {kn*g*nij[0], kn*g*nij[1]};
-        double[] ft = {kt*g*dvt*tij[0], kn*g*dvt*tij[1]};
+        double[] ft = {kt*g*dvt*tij[0], kt*g*dvt*tij[1]};
 
         return new double[]{fn[0] + ft[0], fn[1] + ft[1]};
     }
