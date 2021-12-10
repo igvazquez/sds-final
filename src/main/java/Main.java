@@ -7,8 +7,8 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        var p1 = new Particle(1, 0, 0, 0.7, 0, 0.7, new double[]{2, 0.5}, 60, 0.5);
-        var p2 = new Particle(2, 0, 2, 0.7, 0, 0.7, new double[]{2, 0.5}, 60, 0.5);
+        var p1 = new Particle(1, 0, 1, 0.7, 0, 0.7, new double[]{5, 8}, 60, 0.5);
+        var p2 = new Particle(2, 0, 7, 0.7, 0, 0.7, new double[]{5, 0}, 60, 0.5);
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5);
 
         p1.setIntegrator(new Verlet(p1, sfm));
@@ -34,7 +34,7 @@ public class Main {
                 p.advanceParticle(t, dt, neighbours.get(p));
                 System.out.println(p);
             }
-            buffer.write(0 + " " + 2 + " " + 0.5 + " " + 0 + " " + 0 + " " + 0.1);
+            buffer.write(0 + " " + 2 + " " + 5 + " " + 0 + " " + 0 + " " + 0.1);
             buffer.newLine();
             t += i*dt;
         }

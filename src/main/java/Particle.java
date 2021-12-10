@@ -34,8 +34,8 @@ public class Particle {
         double[] nij = new double[2];
         double d = Math.hypot(x - other.getX(), y - other.getY());
 
-        nij[0] = (other.getX() - x) / d;
-        nij[1] = (other.getY() - y) / d;
+        nij[0] = (x - other.getX()) / d;
+        nij[1] = (y - other.getY()) / d;
 
         return nij;
     }
