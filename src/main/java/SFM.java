@@ -30,7 +30,7 @@ public class SFM {
 
         Fd = calculateDesireForce(p);
 
-//        neighbours.remove(p);
+        neighbours.remove(p);
         for(final Particle other : neighbours){
             var fg = calculateGranularForce(p, other);
             var fs = calculateSocialForce(p, other);

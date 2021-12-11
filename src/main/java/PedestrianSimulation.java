@@ -29,15 +29,14 @@ public class PedestrianSimulation {
         CellIndexMethod cim;
 
         int i = 0;
-        while (!currentState.isEmpty() && i < maxIter) {
-            if(i++ % 500 == 0){
-                System.out.println("Iter: " + i);
-            }
+        while (!currentState.isEmpty() && i < 10) {
+            System.out.println("Iter: " + i);
             cim = new CellIndexMethod(board, board.getMaxR(), false);
             cim.calculateNeighbours();
             currentState = doStep(currentState, cim);
             board.updateParticles(currentState);
             states.add(currentState);
+            i++;
         }
         if (logToFile){
             writeBoardToFile();

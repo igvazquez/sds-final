@@ -80,9 +80,9 @@ public class Board {
         return i + M * j;
     }
 
-    private static boolean overlap(double x, double y, double r, List<Particle> particles) {
-        if (particles.size() == 0) {
-            return false;
+    private static boolean overlap(double x, double y, double r, double l, List<Particle> particles) {
+        if (x - r <= X_PADDING || x + r >= l - X_PADDING || y + r >= l - Y_PADDING || y + r <= Y_PADDING) {
+            return true;
         }
         for (Particle p : particles) {
             if (Math.hypot(x - p.getX(), y - p.getY()) - r - p.getRadius() <= 0) {
@@ -99,8 +99,8 @@ public class Board {
         List<Particle> particles = new ArrayList<>();
 
         double x, y, mass, radius;
-        double[] vel = new double[]{0.7, 0};
-        Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, null);
+        double[] vel = new double[]{0, -0.6};
+        Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
         int i;
@@ -108,12 +108,12 @@ public class Board {
             do {
                 x = X_PADDING + Math.random() * (l-2*X_PADDING);
                 y = Y_PADDING + Math.random() * (l-2*Y_PADDING);
-                //radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
-            } while (overlap(x, y, maxR, particles));
+                radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
+            } while (overlap(x, y, radius, l, particles));
 
 //            vel = calculateVelocityToTarget(maxV, l, d, x, y);
 //            mass = Math.random() * maxMass;
-            Particle p = new Particle(i, x, y, vel[0], vel[1], vd, new double[]{5, 10}, maxMass, maxR);
+            Particle p = new Particle(i, x, y, vel[0], vel[1], vd, new double[]{l/2, Y_PADDING}, maxMass, radius);
             p.setIntegrator(new Verlet(p, sfm));
             particles.add(p);
         }

@@ -31,6 +31,20 @@ public class Particle {
         this.radius = radius;
     }
 
+    public Particle(int id, double x, double y, double vx, double vy,
+                    double vd, double[] target, double mass, double radius, Verlet integrator) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.vd = vd;
+        this.target = target;
+        this.mass = mass;
+        this.radius = radius;
+        this.integrator = integrator;
+    }
+
     public double[] getNij(final Particle other){
         double[] nij = new double[2];
         double d = Math.hypot(x - other.getX(), y - other.getY());
@@ -94,7 +108,8 @@ public class Particle {
         y = newState[1].getR();
         vy = newState[1].getV();
 
-        return new Particle(this.id, x, y, vx, vy, this.vd, this.target, this.mass, this.radius);
+        return new Particle(this.id, x, y, vx, vy, this.vd,
+                this.target, this.mass, this.radius, this.integrator);
     }
 
     @Override

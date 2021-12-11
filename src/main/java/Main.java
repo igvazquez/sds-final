@@ -23,15 +23,16 @@ public class Main {
         var iterations = 100;
         int n = 5;
         double d = 1.2;
-        double l = 10;
-        double r = 0.5;
+        double l = 20;
+        double minR = 0.5;
+        double maxR = 0.6;
         double m = 60;
         double maxV = 0.7;
         double tau = 0;
         double beta = 0;
         double rc = 1;
 
-        Board board = Board.getRandomBoard(n, d, l, Board.optM(l, r), r, r, maxV, maxV, tau, beta, maxV, m);
+        Board board = Board.getRandomBoard(n, d, l, Board.optM(l, maxR), minR, maxR, maxV, maxV, tau, beta, maxV, m);
         PedestrianSimulation simulation = new PedestrianSimulation(board, rc, beta, tau);
         simulation.simulate(iterations, true);
         /* FileWriter pos = new FileWriter("board.xyz", false);
