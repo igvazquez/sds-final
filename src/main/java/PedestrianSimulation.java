@@ -49,7 +49,8 @@ public class PedestrianSimulation {
         List<Particle> nextState = new ArrayList<>(currentState.size());
         Map<Integer, Set<Particle>> neighbours = cim.getNeighboursMap();
         for (Particle p : currentState) {
-            Particle newParticle = board.advanceParticle(p, neighbours.get(p.getId()));
+            // Particle newParticle = board.advanceParticle(p, neighbours.get(p.getId()));
+            Particle newParticle = p.advanceParticle(t, board.getDt(), neighbours.get(p.getId()));
 
             if(newParticle.getY() > 0) {
                 nextState.add(newParticle);

@@ -9,6 +9,8 @@ public class Board {
     public static final double TARGET_DISTANCE_FROM_DOOR = -10;
     public static final double TARGET_LENGTH = 3;
     public static final double TARGET_TRIM = 0.2;
+    public static final double X_PADDING = 5.0;
+    public static final double Y_PADDING = 2.0;
 
     private final double L;
     private final double minR;
@@ -37,6 +39,22 @@ public class Board {
         M = m;
         this.cells = new HashMap<>();
         sortBoard(particles);
+    }
+
+    public double getDoorWidth() {
+        return doorWidth;
+    }
+
+    public static double getxPadding() {
+        return X_PADDING;
+    }
+
+    public static double getyPadding() {
+        return Y_PADDING;
+    }
+
+    public double getL() {
+        return L;
     }
 
     public void sortBoard(List<Particle> newParticles) {
@@ -81,23 +99,27 @@ public class Board {
         List<Particle> particles = new ArrayList<>();
 
         double x, y, mass, radius;
-        double[] vel;
+        double[] vel = new double[]{0.7, 0};
+        Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, null);
+        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
         int i;
         for (i = 0; i < n; i++) {
             do {
-                x = Math.random() * l;
-                y = Math.random() * l;
-                radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
-            } while (overlap(x, y, radius, particles));
+                x = X_PADDING + Math.random() * (l-2*X_PADDING);
+                y = Y_PADDING + Math.random() * (l-2*Y_PADDING);
+                //radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
+            } while (overlap(x, y, maxR, particles));
 
-            vel = calculateVelocityToTarget(maxV, l, d, x, y);
-            mass = Math.random() * maxMass;
-
-            particles.add(new Particle(i, x, y, vel[0], vel[1], vd, vel, mass, radius));
+//            vel = calculateVelocityToTarget(maxV, l, d, x, y);
+//            mass = Math.random() * maxMass;
+            Particle p = new Particle(i, x, y, vel[0], vel[1], vd, new double[]{5, 10}, maxMass, maxR);
+            p.setIntegrator(new Verlet(p, sfm));
+            particles.add(p);
         }
 
-        return new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, particles);
+        board.setParticles(particles);
+        return board;
     }
 
     public static double[] calculateVelocityToTarget(final double maxV, final double l, final double doorWidth, final double x, final double y) {

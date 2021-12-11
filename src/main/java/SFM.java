@@ -2,6 +2,7 @@ import lombok.Data;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class SFM {
@@ -11,16 +12,18 @@ public class SFM {
     double A;
     double B;
     double tau;
+    Board board;
 
-    public SFM(double kn, double kt, double a, double b, double tau) {
+    public SFM(double kn, double kt, double a, double b, double tau, Board board) {
         this.kn = kn;
         this.kt = kt;
         A = a;
         B = b;
         this.tau = tau;
+        this.board = board;
     }
 
-    public double[] getAcceleration(final Particle p, final List<Particle> neighbours){
+    public double[] getAcceleration(final Particle p, final Set<Particle> neighbours){
         double[] Fg = new double[2]; // Granular Force
         double[] Fs = new double[2]; // Social Force
         double[] Fd; // Desire Force
@@ -38,13 +41,76 @@ public class SFM {
             Fs[1] += fs[1];
         }
 
+        var wallFg = calculateWallGranularForce(p);
+        Fg[0] += wallFg[0];
+        Fg[1] += wallFg[1];
+
         final var a = new double[2];
         a[0] = (Fg[0] + Fs[0] + Fd[0])/p.getMass();
         a[1] = (Fg[1] + Fs[1] + Fd[1])/p.getMass();
         return a;
     }
 
-    public double[] getForce(final Particle p, final List<Particle> neighbours){
+    private double[] calculateWallGranularForce(Particle p) {
+
+        /*
+        *         var nij = p.getNij(other);
+        var tij = p.getTangentVector(other);
+        var dvt = (other.getVx()-p.getVx())*tij[0] + (other.getVy()-p.getVy())*tij[1];
+        var g = p.centerDistanceTo(other) > p.getRadius() + other.getRadius() ?
+                0 : p.getRadius() + other.getRadius() - p.centerDistanceTo(other);
+
+        double[] fn = {kn*g*nij[0], kn*g*nij[1]};
+        double[] ft = {kt*g*dvt*tij[0], kt*g*dvt*tij[1]};
+
+        return new double[]{fn[0] + ft[0], fn[1] + ft[1]};
+        *
+        */
+        double[] fn = {0.0, 0.0};
+        double[] ft = {0.0, 0.0};
+        double[] niw = new double[2];
+        double g;
+        double d;
+        if (p.getX() - p.getRadius() <= 0 + Board.getxPadding()) {
+            //choque pared izq
+            g = Board.getxPadding() - p.getX() > p.getRadius() ? 0 : p.getRadius() - (Board.getxPadding() - p.getX());
+            d = Math.hypot(p.getX() - Board.getxPadding(), 0);
+            niw[0] = (p.getX() - Board.getxPadding()) / d;
+            niw[1] = 0;
+            fn[0] = kn * g * niw[0];
+            fn[1] = 0;
+            ft[0] = -fn[1];
+            ft[1] = fn[0];
+        } else if (p.getX() + p.getRadius() >= board.getL() - Board.getxPadding()) {
+            //choque con pared der
+            g = (board.getL() - Board.getxPadding()) - p.getX() > p.getRadius() ? 0 : p.getRadius() - (board.getL() - Board.getxPadding()) - p.getX();
+            d = Math.hypot((board.getL() - Board.getxPadding() - p.getX()), 0);
+            niw[0] = (board.getL() - Board.getxPadding() - p.getX()) / d;
+            niw[1] = 0;
+            fn[0] = kn * g * niw[0];
+            fn[1] = 0;
+            ft[0] = -fn[1];
+            ft[1] = fn[0];
+        } else if (p.getY() + p.getRadius() >= board.getL() - Board.getyPadding()) {
+            //choque pared de arriba
+            g = (board.getL() - Board.getyPadding()) - p.getY() > p.getRadius() ? 0 : p.getRadius() - (board.getL() - Board.getyPadding()) - p.getY();
+            d = Math.hypot(0, (board.getL() - Board.getyPadding() - p.getY()));
+
+        } else if ((p.getY() <= Board.getyPadding() && p.getY() + p.getRadius() >= Board.getyPadding()) || (p.getY() > Board.getyPadding() && p.getY() - p.getRadius() <= Board.getyPadding())) {
+            if (p.getX() <= board.getL()/2 - board.getDoorWidth()/2 || p.getX() >= board.getL()/2 + board.getDoorWidth()/2) {
+                //choque pared abajo
+
+            } else if (p.getX() - p.getRadius() <= board.getL()/2 - board.getDoorWidth()/2) {
+
+            } else if (p.getX() + p.getRadius() >= board.getL()/2 + board.getDoorWidth()/2) {
+
+            }
+        }
+
+        return new double[]{fn[0] + ft[0], fn[1] + ft[1]};
+    }
+
+    public double[] getForce(final Particle p, final Set<Particle> neighbours){
         var a = getAcceleration(p, neighbours);
         a[0] = p.getMass()*a[0];
         a[1] = p.getMass()*a[1];

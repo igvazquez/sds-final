@@ -1,6 +1,7 @@
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 public class Verlet {
 
@@ -27,7 +28,7 @@ public class Verlet {
         this.prevRy = null;
     }
 
-    public State[] step(double t, final double dt, final List<Particle> neighbours) {
+    public State[] step(double t, final double dt, final Set<Particle> neighbours) {
         var f = force.getForce(particle, neighbours);
         if (prevRx == null)
             prevRx = estimatePrevR(currRx, currVx, f[0], dt, mass);
