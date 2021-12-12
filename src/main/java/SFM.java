@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.math3.util.Precision.EPSILON;
+
 @Data
 public class SFM {
 
@@ -31,19 +33,25 @@ public class SFM {
         Fd = calculateDesireForce(p);
 
         neighbours.remove(p);
-        for(final Particle other : neighbours){
-            var fg = calculateGranularForce(p, other);
-            var fs = calculateSocialForce(p, other);
 
-            Fg[0] += fg[0];
-            Fg[1] += fg[1];
-            Fs[0] += fs[0];
-            Fs[1] += fs[1];
+        var wallFg = calculateWallGranularForce(p);
+        Fg[0] += wallFg[0];
+        Fg[1] += wallFg[1];
+
+        if (Math.abs(Fg[0]) <= EPSILON || Math.abs(Fg[1]) <= EPSILON){
+            for(final Particle other : neighbours){
+                var fg = calculateGranularForce(p, other);
+                var fs = calculateSocialForce(p, other);
+
+                Fg[0] += fg[0];
+                Fg[1] += fg[1];
+                Fs[0] += fs[0];
+                Fs[1] += fs[1];
+            }
+        }else {
+            System.out.println("asd");
         }
 
-//        var wallFg = calculateWallGranularForce(p);
-//        Fg[0] += wallFg[0];
-//        Fg[1] += wallFg[1];
 
         final var a = new double[2];
         a[0] = (Fg[0] + Fs[0] + Fd[0])/p.getMass();
