@@ -21,6 +21,7 @@ public class Board {
     private final double beta;
     private final double dt;
     private final double doorWidth;
+    private final int turnstiles;
     private final int M;
     private final Map<Integer, List<Particle>> cells;
     private List<Particle> particles;
@@ -33,10 +34,28 @@ public class Board {
         this.maxV = maxV;
         this.Ve = Ve;
         this.doorWidth = d;
+        this.turnstiles = 1;
         this.tau = tau;
         this.beta = beta;
         this.dt = minR / (2 * Math.max(maxV, Ve));
         M = m;
+        this.cells = new HashMap<>();
+        sortBoard(particles);
+    }
+
+    public Board(double l, double d, int turnstiles, double minR, double maxR, double maxV, double tau,
+                 double beta, double Ve, int m, List<Particle> particles) {
+        L = l;
+        M = m;
+        this.minR = minR;
+        this.maxR = maxR;
+        this.maxV = maxV;
+        this.Ve = Ve;
+        this.doorWidth = d;
+        this.turnstiles = turnstiles;
+        this.tau = tau;
+        this.beta = beta;
+        this.dt = minR / (2 * Math.max(maxV, Ve));
         this.cells = new HashMap<>();
         sortBoard(particles);
     }
@@ -152,6 +171,8 @@ public class Board {
     public List<Particle> getCell(int idx) {
         return cells.get(idx);
     }
+
+    public int getTurnstiles() { return turnstiles; }
 
     @Override
     public String toString() {
