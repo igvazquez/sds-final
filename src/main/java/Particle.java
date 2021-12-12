@@ -100,16 +100,13 @@ public class Particle {
         return distanceTo(particle) <= 0;
     }
 
-    public Particle advanceParticle(double t, final double dt, final Set<Particle> neighbours) {
+    public void advanceParticle(double t, final double dt, final Set<Particle> neighbours) {
         var newState = integrator.step(t, dt, neighbours);
 
         x = newState[0].getR();
         vx = newState[0].getV();
         y = newState[1].getR();
         vy = newState[1].getV();
-
-        return new Particle(this.id, x, y, vx, vy, this.vd,
-                this.target, this.mass, this.radius, this.integrator);
     }
 
     @Override

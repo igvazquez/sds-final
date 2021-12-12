@@ -41,9 +41,9 @@ public class SFM {
             Fs[1] += fs[1];
         }
 
-        var wallFg = calculateWallGranularForce(p);
-        Fg[0] += wallFg[0];
-        Fg[1] += wallFg[1];
+//        var wallFg = calculateWallGranularForce(p);
+//        Fg[0] += wallFg[0];
+//        Fg[1] += wallFg[1];
 
         final var a = new double[2];
         a[0] = (Fg[0] + Fs[0] + Fd[0])/p.getMass();
