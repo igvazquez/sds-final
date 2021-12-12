@@ -58,7 +58,7 @@ public class PedestrianSimulation {
             // Particle newParticle = board.advanceParticle(p, neighbours.get(p.getId()));
             p.advanceParticle(t, board.getDt(), neighbours.get(p.getId()));
 
-            if(p.getY() > 0) {
+            if(p.getY() > Board.Y_PADDING) {
                 nextState.add(p);
             }
         }

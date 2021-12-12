@@ -101,7 +101,7 @@ public class Board {
         List<Particle> particles = new ArrayList<>();
 
         double x, y, mass, radius;
-        double[] vel = new double[]{0.7, -0.7};
+        double[] vel;
         Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
@@ -113,7 +113,7 @@ public class Board {
                 radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 
-//            vel = calculateVelocityToTarget(maxV, l, d, x, y);
+            vel = calculateVelocityToTarget(maxV, l, d, x, y);
 //            mass = Math.random() * maxMass;
             Particle p = new Particle(i, x, y, vel[0], vel[1], vd, new double[]{l/2, Y_PADDING}, maxMass, radius);
             p.setIntegrator(new Verlet(p, sfm));
@@ -136,11 +136,7 @@ public class Board {
         double vx = v * (dx / distance);
         double vy = v * (dy / distance);
 
-        double[] ret = new double[2];
-        ret[0] = vx;
-        ret[1] = vy;
-
-        return ret;
+        return new double[]{vx, vy};
     }
 
     public static int optM(final double l, final double rc) {
