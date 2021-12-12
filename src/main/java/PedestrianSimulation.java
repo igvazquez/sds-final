@@ -30,17 +30,23 @@ public class PedestrianSimulation {
         CellIndexMethod cim;
 
         int i = 0;
-        while (!currentState.isEmpty() && i < 10) {
-            System.out.println("Iter: " + i);
-            cim = new CellIndexMethod(board, board.getMaxR(), false);
-            cim.calculateNeighbours();
-            currentState = doStep(currentState, cim);
-            board.updateParticles(currentState);
-            states.add(currentState.stream().map(OutputData::new).collect(Collectors.toList()));
-            i++;
-        }
-        if (logToFile){
-            writeBoardToFile();
+        try {
+            while (!currentState.isEmpty() && i < maxIter) {
+                System.out.println("Iter: " + i);
+                cim = new CellIndexMethod(board, board.getMaxR(), false);
+                cim.calculateNeighbours();
+                currentState = doStep(currentState, cim);
+                board.updateParticles(currentState);
+                states.add(currentState.stream().map(OutputData::new).collect(Collectors.toList()));
+                i++;
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("exploto en " + i);
+            System.out.println(e.getMessage());
+        } finally {
+            if (logToFile){
+                writeBoardToFile();
+            }
         }
     }
 
@@ -63,7 +69,7 @@ public class PedestrianSimulation {
         FileWriter pos = new FileWriter("testBoard.xyz", false);
         BufferedWriter buffer = new BufferedWriter(pos);
         for(List<OutputData> particles : states) {
-            buffer.write(String.valueOf(particles.size() + 6));
+            buffer.write(String.valueOf(particles.size() + 12));
             buffer.newLine();
             buffer.newLine();
             writeDummyParticles(buffer);
@@ -86,9 +92,21 @@ public class PedestrianSimulation {
         buffer.newLine();
         buffer.write("204 20 20 0 0 0.0001");
         buffer.newLine();
-        buffer.write("205 "+(board.getL()/2)+" 2.0 0 0 1");
+        buffer.write("214 5 18 0 0 0.05");
+        buffer.newLine();
+        buffer.write("215 15 18 0 0 0.05");
+        buffer.newLine();
+        buffer.write("216 5 2 0 0 0.05");
+        buffer.newLine();
+        buffer.write("217 15 2 0 0 0.05");
+        buffer.newLine();
+        buffer.write("205 "+ ((board.getL()/2) - this.board.getDoorWidth()/2) +" 0 0 0 0.1");
         buffer.newLine();
         buffer.write("206 "+(board.getL()/2 + this.board.getDoorWidth()/2)+" 0 0 0 0.1");
+        buffer.newLine();
+        buffer.write("207 "+((board.getL()/2) - this.board.getDoorWidth()/2)+" 2 0 0 0.1");
+        buffer.newLine();
+        buffer.write("208 "+(board.getL()/2 + this.board.getDoorWidth()/2)+" 2 0 0 0.1");
         buffer.newLine();
     }
 }

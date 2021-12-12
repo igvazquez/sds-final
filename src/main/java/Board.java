@@ -23,6 +23,7 @@ public class Board {
     private final double doorWidth;
     private final int M;
     private final Map<Integer, List<Particle>> cells;
+    private final double referenceDt;
     private List<Particle> particles;
 
     public Board(double l, double d, double minR, double maxR, double maxV, double tau,
@@ -35,7 +36,8 @@ public class Board {
         this.doorWidth = d;
         this.tau = tau;
         this.beta = beta;
-        this.dt = minR / (2 * Math.max(maxV, Ve));
+        this.dt = Math.sqrt(60.0 / 120000);
+        this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
         sortBoard(particles);
@@ -68,7 +70,7 @@ public class Board {
     public void divideParticles() {
         for (Particle p : particles) {
             if (p.getX() < 0 || p.getX() > L || p.getY() < 0 || p.getY() > L) {
-                throw new IllegalArgumentException("Partícula fuera de los límites." + p);
+                throw new IllegalArgumentException("Partícula fuera de los límites." + "X: " + p.getX() + " " + "Y: " + p.getY());
             }
             cells.get(calculateCellIndexOnBoard(p.getX(), p.getY())).add(p);
         }
@@ -99,7 +101,7 @@ public class Board {
         List<Particle> particles = new ArrayList<>();
 
         double x, y, mass, radius;
-        double[] vel = new double[]{0, -0.6};
+        double[] vel = new double[]{0.7, -0.7};
         Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 

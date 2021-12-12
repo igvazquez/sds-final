@@ -34,7 +34,7 @@ public class SFM {
 
         neighbours.remove(p);
 
-        var wallFg = calculateWallGranularForce(p);
+        var wallFg = calculateWallForce(p);
         Fg[0] += wallFg[0];
         Fg[1] += wallFg[1];
 
@@ -59,42 +59,52 @@ public class SFM {
         return a;
     }
 
-    private double[] calculateWallGranularForce(Particle p) {
+    private double[] calculateWallForce(Particle p) {
         double d, g = 0;
         double[] niw = new double[2];
+        double[] tiw = new double[2];
+        Particle wall = new Particle(-1, 0, 0, 0.0, 0.0,
+                0.0, new double[]{0.0, 0.0}, 0.0, 0.0);;
+
         if (p.getX() - p.getRadius() <= 0 + Board.getxPadding()) {
             // WALL TO THE LEFT
             g = Math.abs(p.getX() - Board.getxPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(Board.getxPadding() - p.getX());
-            d = Math.hypot(p.getX() - Board.getxPadding(), 0);  // closest point of the wall shares the same y value
-            niw = new double[] {(p.getX() - Board.getxPadding()) / d, 0};
+            wall = new Particle(-1, Board.getxPadding(), p.getY(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
         } else if (p.getX() + p.getRadius() >= board.getL() - Board.getxPadding()) {
             // WALL TO THE RIGHT
             g = Math.abs(board.getL() - Board.getxPadding() - p.getX()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getxPadding() - p.getX());
-            d = Math.hypot((board.getL() - Board.getxPadding() - p.getX()), 0);     // closest point of the wall shares the same y value
-            niw = new double[] {(p.getX()-(board.getL() - Board.getxPadding())) / d, 0};
+            wall = new Particle(-1, board.getL() - Board.getxPadding(), p.getY(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            niw = p.getNij(wall);
+            tiw = p.getTangentVector(wall);
         } else if (p.getY() + p.getRadius() >= board.getL() - Board.getyPadding()) {
             // WALL ABOVE
             g = Math.abs((board.getL() - Board.getyPadding()) - p.getY()) > p.getRadius() ? 0 : p.getRadius() - Math.abs((board.getL() - Board.getyPadding()) - p.getY());
-            d = Math.hypot(0, (board.getL() - Board.getyPadding() - p.getY()));     // closest point of the wall shares the same x value
-            niw= new double[] {0, (p.getY() - (board.getL() - Board.getyPadding())) / d};
+            wall = new Particle(-1, p.getX(), board.getL() - Board.getyPadding(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            niw = p.getNij(wall);
+            tiw = p.getTangentVector(wall);
         } else if ((p.getY() <= Board.getyPadding() && p.getY() + p.getRadius() >= Board.getyPadding()) || (p.getY() > Board.getyPadding() && p.getY() - p.getRadius() <= Board.getyPadding())) {
             // TODO: Fix condition that locates turnstiles
             // If it's not in front of a turnstile
             if (p.getX() <= board.getL()/2 - board.getDoorWidth()/2 || p.getX() >= board.getL()/2 + board.getDoorWidth()/2) {
                 // WALL BELOW
                 g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                d = Math.hypot(0, p.getY() - Board.getyPadding());     // closest point of the wall shares the same x value
-                niw= new double[] {0, (p.getY() - Board.getyPadding()) / d};
-            // If it bounces against the walls of the turnstile
+                wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                niw = p.getNij(wall);
+                tiw = p.getTangentVector(wall);
+                // If it bounces against the walls of the turnstile
             } else if (p.getX() - p.getRadius() <= board.getL()/2 - board.getDoorWidth()/2) {
                 // TURNSTILE WALL TO THE LEFT
                 if(p.getY() > Board.getyPadding()) {
-                    // Border (has its own x and y coord)
-                    double gx = Math.abs(p.getX() - (board.getL()/2 - board.getDoorWidth()/2)) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getX() - (board.getL()/2 - board.getDoorWidth()/2));
-                    double gy = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                    g = Math.hypot(gx, gy);
-                    d = Math.hypot(p.getX() - (board.getL()/2 - board.getDoorWidth()/2), p.getY() - Board.getyPadding());
-                    niw= new double[] {(p.getX() - (board.getL()/2 - board.getDoorWidth()/2)) / d, (p.getY() - Board.getyPadding()) / d};
+                    wall = new Particle(-1, (board.getL()/2 - board.getDoorWidth()/2), Board.getyPadding(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = p.centerDistanceTo(wall) > p.getRadius() + wall.getRadius() ?
+                            0 : p.getRadius() + wall.getRadius() - p.centerDistanceTo(wall);
+                    niw = p.getNij(wall);
+                    tiw = p.getTangentVector(wall);
                 } else {
                     // Wall (same y as particle, has its own x)
                     // Should this happen? Or do we guide the particle to the center if the turnstile is empty?
@@ -106,24 +116,28 @@ public class SFM {
             } else if (p.getX() + p.getRadius() >= board.getL()/2 + board.getDoorWidth()/2) {
                 // TURNSTILE WALL TO THE RIGHT
                 if(p.getY() > Board.getyPadding()) {
-                    // Border (has its own x and y coord)
-                    double gx = Math.abs(p.getX() - (board.getL()/2 + board.getDoorWidth()/2)) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getX() - (board.getL()/2 + board.getDoorWidth()/2));
-                    double gy = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                    g = Math.hypot(gx, gy);
-                    d = Math.hypot(p.getX() - (board.getL()/2 + board.getDoorWidth()/2), p.getY() - Board.getyPadding());
-                    niw= new double[] {(p.getX() - (board.getL()/2 + board.getDoorWidth()/2)) / d, (p.getY() - Board.getyPadding()) / d};
+                    wall = new Particle(-1, (board.getL()/2 + board.getDoorWidth()/2), Board.getyPadding(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = p.centerDistanceTo(wall) > p.getRadius() + wall.getRadius() ?
+                            0 : p.getRadius() + wall.getRadius() - p.centerDistanceTo(wall);
+                    niw = p.getNij(wall);
+                    tiw = p.getTangentVector(wall);
                 } else {
                     // Wall (same y as particle, has its own x)
                     // Should this happen? Or do we guide the particle to the center if the turnstile is empty?
                     g = Math.abs(p.getX() - (board.getL()/2 + board.getDoorWidth()/2)) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getX() - (board.getL()/2 + board.getDoorWidth()/2));
-                    d = Math.hypot(p.getX() - (board.getL()/2 + board.getDoorWidth()/2), 0);  // closest point of the wall shares the same y value
-                    niw = new double[] {(p.getX() - (board.getL()/2 + board.getDoorWidth()/2)) / d, 0};
+
                 }
             }
         }
+        var prod = p.getVx() * tiw[0] + p.getVy() * tiw[1];
+        var exp = A*Math.exp((p.getRadius() - p.centerDistanceTo(wall))/B);
+
         double[] fn = new double[] {kn * g * niw[0], kn * g * niw[1]};
-        double[] ft = new double[] {-fn[1], fn[0]};
-        return new double[]{fn[0] + ft[0], fn[1] + ft[1]};
+        double[] ft = {kt*g*prod*tiw[0], kt*g*prod*tiw[1]};
+
+        //double[] ft = new double[] {-fn[1], fn[0]};
+        return new double[]{fn[0] + ft[0] +  exp * niw[0], fn[1] + ft[1] + exp * niw[1]};
     }
 
     public double[] getForce(final Particle p, final Set<Particle> neighbours){
