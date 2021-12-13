@@ -16,6 +16,8 @@ public class PedestrianSimulation {
     private final double tau;
     private double t;
 
+    private final double DUMMY_RADIUS = 0.05;
+
     public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau) {
         this.board = board;
         this.rc = rc;
@@ -34,7 +36,7 @@ public class PedestrianSimulation {
             while (!currentState.isEmpty() && i < maxIter) {
                 System.out.println("Iter: " + i);
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
-                cim.calculateNeighbours();
+                cim.calculateNeighboursBrute();
                 currentState = doStep(currentState, cim);
                 board.updateTurnstiles(t);
                 board.updateParticles(currentState);
@@ -46,7 +48,7 @@ public class PedestrianSimulation {
             System.out.println(e.getMessage());
         } finally {
             if (logToFile){
-                writeBoardToFile();
+                writeBoardToFile2();
             }
         }
     }
@@ -65,6 +67,57 @@ public class PedestrianSimulation {
             }
         }
         return nextState;
+    }
+
+    public void writeBoardToFile2() throws IOException {
+
+        StringBuffer dummiesBuff = new StringBuffer();
+        int dummies = writeDummyParticles(dummiesBuff);
+        FileWriter pos = new FileWriter("pedestrian_sim.xyz", false);
+        BufferedWriter buffer = new BufferedWriter(pos);
+        for(List<OutputData> particles : states) {
+            buffer.write(String.valueOf(particles.size() + dummies));
+            buffer.newLine();
+            buffer.newLine();
+            buffer.write(dummiesBuff.toString());
+            for(OutputData p : particles) {
+                buffer.write((p.getId() + dummies) + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius());
+                buffer.newLine();
+            }
+        }
+        buffer.flush();
+        buffer.close();
+        pos.close();
+    }
+
+    private int writeDummyParticles(final StringBuffer buffer){
+
+        int count = 0;
+
+        double d = board.getDoorWidth();
+        int turnstiles = board.getTurnstiles().size();
+        double sep = (board.getL() - Board.getxPadding()*2 - d*turnstiles) / (turnstiles+1);
+
+        double i;
+        for(i=Board.getxPadding()- DUMMY_RADIUS; i- DUMMY_RADIUS <=board.getL()-Board.getxPadding(); i+= DUMMY_RADIUS) {
+            buffer.append(count).append(" ").append(i).append(" ").append(board.getL() - Board.getyPadding() + DUMMY_RADIUS).append(" 0 0 ").append(DUMMY_RADIUS).append("\n");
+            count++;
+            for(int m=0; m<=turnstiles; m++) {
+                if((i>Board.getxPadding()+sep*turnstiles+d*turnstiles) || (i<Board.getxPadding()+sep) || (i>=Board.getxPadding()+ DUMMY_RADIUS +sep*m+d*m) && (i<=Board.getxPadding()- DUMMY_RADIUS +sep*(m+1)+d*m)) {
+                    buffer.append(count).append(" ").append(i).append(" ").append(Board.getyPadding() - DUMMY_RADIUS).append(" 0 0 ").append(DUMMY_RADIUS).append("\n");
+                    count++;
+                }
+            }
+        }
+
+        for(double j = Board.getyPadding()- DUMMY_RADIUS; j- DUMMY_RADIUS <=board.getL()-Board.getyPadding(); j+= DUMMY_RADIUS) {
+            buffer.append(count).append(" ").append(Board.getxPadding() - DUMMY_RADIUS).append(" ").append(j).append(" 0 0 ").append(DUMMY_RADIUS).append("\n");
+            count++;
+            buffer.append(count).append(" ").append(board.getL() - Board.getxPadding() + DUMMY_RADIUS).append(" ").append(j).append(" 0 0 ").append(DUMMY_RADIUS).append("\n");
+            count++;
+        }
+
+        return count;
     }
 
     private void writeBoardToFile() throws IOException {

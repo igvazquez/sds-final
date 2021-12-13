@@ -118,6 +118,16 @@ public class CellIndexMethod {
         return neighboursMap;
     }
 
+    public void calculateNeighboursBrute() {
+        for(Particle p : board.getParticles()) {
+            for(Particle n : board.getParticles()) {
+                if(p.collides(n)) {
+                    neighboursMap.get(p.getId()).add(n);
+                }
+            }
+        }
+    }
+
     public Board getBoard() {
         return board;
     }
