@@ -11,13 +11,15 @@ public class PedestrianSimulation {
 
     private List<List<OutputData>> states = new LinkedList<>();
     private final Board board;
+    private final SFM sfm;
     private final double rc;
     private final double beta;
     private final double tau;
     private double t;
 
-    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau) {
+    public PedestrianSimulation(final Board board, final SFM sfm, final double rc, final double beta, final double tau) {
         this.board = board;
+        this.sfm = sfm;
         this.rc = rc;
         this.beta = beta;
         this.tau = tau;
@@ -57,10 +59,11 @@ public class PedestrianSimulation {
         Map<Integer, Set<Particle>> neighbours = cim.getNeighboursMap();
         for (Particle p : currentState) {
             // Particle newParticle = board.advanceParticle(p, neighbours.get(p.getId()));
-            p.advanceParticle(t, board.getDt(), neighbours.get(p.getId()));
+            var newParticle = p.advanceParticle(t, board.getDt(), neighbours.get(p.getId()));
 
-            if(p.getY() > 0) {
-                nextState.add(p);
+            if(newParticle.getY() > 0) {
+                newParticle.setIntegrator(new Verlet(p, newParticle, sfm));
+                nextState.add(newParticle);
             }
         }
         return nextState;

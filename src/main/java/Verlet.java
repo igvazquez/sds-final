@@ -28,6 +28,18 @@ public class Verlet {
         this.prevRy = null;
     }
 
+    public Verlet(Particle prevParticle, Particle particle, SFM forceFunction) {
+        this.particle = particle;
+        this.currRx = particle.getX();
+        this.currVx = particle.getVx();
+        this.currRy = particle.getY();
+        this.currVy = particle.getVy();
+        this.mass = particle.getMass();
+        this.force = forceFunction;
+        this.prevRx = prevParticle.getX();
+        this.prevRy = prevParticle.getY();
+    }
+
     public State[] step(double t, final double dt, final Set<Particle> neighbours) {
         var f = force.getForce(particle, neighbours, t);
         if (prevRx == null)

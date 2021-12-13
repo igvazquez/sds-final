@@ -24,7 +24,6 @@ public class Board {
     private final List<Turnstile> turnstiles;
     private final int M;
     private final Map<Integer, List<Particle>> cells;
-    private final double referenceDt;
     private List<Particle> particles;
 
     public Board(double l, double d, int turnstiles, double transactionTime,
@@ -40,7 +39,6 @@ public class Board {
         this.tau = tau;
         this.beta = beta;
         this.dt = Math.sqrt(60.0 / 120000);
-        this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
         generateTurnstiles(turnstiles, transactionTime);
@@ -53,6 +51,7 @@ public class Board {
         }
         var turnstilePadding = (L - 2*X_PADDING - t*doorWidth)/(t+1);
         for (int i = 0; i < t; i++) {
+            System.out.println("Turnstile: x = " + (X_PADDING + (i+1)*turnstilePadding + i*doorWidth) + " y = " + Y_PADDING);
             turnstiles.add(new Turnstile(X_PADDING + (i+1)*turnstilePadding + i*doorWidth, Y_PADDING, 1.5, doorWidth, transactionTime));
         }
     }

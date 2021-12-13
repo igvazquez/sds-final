@@ -1,5 +1,3 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -34,8 +32,8 @@ public class Main {
         p1.setIntegrator(new Verlet(p1, sfm));
         p2.setIntegrator(new Verlet(p2, sfm));
 
-        board = Board.getRandomBoard(n, d, 3, transactionTime, l, Board.optM(l, maxR), minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
+        board = Board.getRandomBoard(n, d, 3, transactionTime, l, 10, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, sfm, maxR, beta, tau);
         simulation.simulate(iterations, true);
     }
 }

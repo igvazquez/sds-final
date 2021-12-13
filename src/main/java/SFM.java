@@ -5,6 +5,8 @@ import java.util.Set;
 @Data
 public class SFM {
 
+    private final double SOCIAL_INTERACTION_RADIUS = 0.05;
+
     double kn;
     double kt;
     double A;
@@ -35,13 +37,15 @@ public class SFM {
 
             neighbours.remove(p);
             for (final Particle other : neighbours) {
-                var fg = calculateGranularForce(p, other);
-                var fs = calculateSocialForce(p, other);
+                if (p.distanceTo(other) < SOCIAL_INTERACTION_RADIUS){
+                    var fg = calculateGranularForce(p, other);
+                    var fs = calculateSocialForce(p, other);
 
-                Fg[0] += fg[0];
-                Fg[1] += fg[1];
-                Fs[0] += fs[0];
-                Fs[1] += fs[1];
+                    Fg[0] += fg[0];
+                    Fg[1] += fg[1];
+                    Fs[0] += fs[0];
+                    Fs[1] += fs[1];
+                }
             }
         }
 
@@ -116,7 +120,7 @@ public class SFM {
                                 0 : p.getRadius() - p.centerDistanceTo(wall);
                         niw = p.getNij(wall);
                         tiw = p.getTangentVector(wall);
-                    }else{
+                    }else if (p.getY() <= Board.Y_PADDING){
                         // Entering turnstile
                         turnstile.lockTurnstile(p, time);
                     }
