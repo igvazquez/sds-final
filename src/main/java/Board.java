@@ -11,6 +11,7 @@ public class Board {
     public static final double TARGET_TRIM = 0.2;
     public static final double X_PADDING = 5.0;
     public static final double Y_PADDING = 2.0;
+    public static SFM sfm = null;
 
     private final double L;
     private final double minR;
@@ -44,6 +45,8 @@ public class Board {
         generateTurnstiles(turnstiles, transactionTime);
         sortBoard(particles);
     }
+
+
 
     private void generateTurnstiles(final int t, final double transactionTime) {
         if (L - 2*X_PADDING < t*doorWidth || t <= 0){
@@ -113,10 +116,10 @@ public class Board {
 
         List<Particle> particles = new ArrayList<>();
 
-        double x, y, mass, radius;
+        double x, y, radius;
         double[] vel;
         Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
-        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
+        sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
         int i;
         for (i = 0; i < n; i++) {

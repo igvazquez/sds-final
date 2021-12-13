@@ -14,7 +14,7 @@ public class Main {
         neighbours.put(p1, List.of(p2));
         neighbours.put(p2, List.of(p1));
         var iterations = 10000;
-        int n = 20;
+        int n = 50;
         double d = 1.2;
         double l = 20;
         double minR = 0.5;
@@ -26,14 +26,14 @@ public class Main {
         double beta = 0;
         double transactionTime = 2;
 
-        Board board = new Board(l, d, 1, transactionTime, minR, maxR, maxV, tau, beta, maxV, Board.optM(l, maxR), particles);
-        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
+        //Board board = new Board(l, d, 1, transactionTime, minR, maxR, maxV, tau, beta, maxV, Board.optM(l, maxR), particles);
+        /*var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
         p1.setIntegrator(new Verlet(p1, sfm));
-        p2.setIntegrator(new Verlet(p2, sfm));
+        p2.setIntegrator(new Verlet(p2, sfm)); */
 
-        board = Board.getRandomBoard(n, d, 3, transactionTime, l, 10, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
-        PedestrianSimulation simulation = new PedestrianSimulation(board, sfm, maxR, beta, tau);
+        Board board = Board.getRandomBoard(n, d, 1, transactionTime, l, 10, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
         simulation.simulate(iterations, true);
     }
 }

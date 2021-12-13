@@ -5,7 +5,7 @@ import java.util.Set;
 @Data
 public class SFM {
 
-    private final double SOCIAL_INTERACTION_RADIUS = 0.05;
+    private final double SOCIAL_INTERACTION_RADIUS = 100;
 
     double kn;
     double kt;
@@ -37,7 +37,7 @@ public class SFM {
 
             neighbours.remove(p);
             for (final Particle other : neighbours) {
-                if (p.distanceTo(other) < SOCIAL_INTERACTION_RADIUS){
+                if (p.distanceTo(other) < SOCIAL_INTERACTION_RADIUS && !other.isLocked()){
                     var fg = calculateGranularForce(p, other);
                     var fs = calculateSocialForce(p, other);
 
