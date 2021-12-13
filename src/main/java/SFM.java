@@ -5,7 +5,7 @@ import java.util.Set;
 @Data
 public class SFM {
 
-    private final double SOCIAL_INTERACTION_RADIUS = 100;
+    private final double SOCIAL_INTERACTION_RADIUS = 5;
 
     double kn;
     double kt;
@@ -91,8 +91,11 @@ public class SFM {
             boolean bounce = false;
             for (int i = 0; i < t && !bounce; i++) {
                 var turnstile = board.getTurnstiles().get(i);
-                if(p.getX() - Board.X_PADDING > i*turnstilePadding + i*board.getDoorWidth()
-                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + i*board.getDoorWidth()){
+                if((p.getX() - Board.X_PADDING > i*turnstilePadding + i*board.getDoorWidth()
+                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + i*board.getDoorWidth())
+                        ||
+                        (p.getX() > (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING
+                                && p.getX() < (i+2)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING)){
                     // WALL BELOW
                     g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
                     wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,

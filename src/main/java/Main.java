@@ -32,7 +32,7 @@ public class Main {
         p1.setIntegrator(new Verlet(p1, sfm));
         p2.setIntegrator(new Verlet(p2, sfm)); */
 
-        Board board = Board.getRandomBoard(n, d, 1, transactionTime, l, 10, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+        Board board = Board.getRandomBoard(n, d, 3, transactionTime, l, 10, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
         PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
         simulation.simulate(iterations, true);
     }

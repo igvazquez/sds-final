@@ -39,7 +39,7 @@ public class Board {
         this.turnstiles = new ArrayList<>(turnstiles);
         this.tau = tau;
         this.beta = beta;
-        this.dt = Math.sqrt(60.0 / 120000);
+        this.dt = 0.1 * Math.sqrt(60.0 / 120000);
         M = m;
         this.cells = new HashMap<>();
         generateTurnstiles(turnstiles, transactionTime);
