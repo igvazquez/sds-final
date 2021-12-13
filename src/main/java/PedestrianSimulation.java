@@ -36,6 +36,7 @@ public class PedestrianSimulation {
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 cim.calculateNeighbours();
                 currentState = doStep(currentState, cim);
+                board.updateTurnstiles(t);
                 board.updateParticles(currentState);
                 states.add(currentState.stream().map(OutputData::new).collect(Collectors.toList()));
                 i++;
@@ -58,7 +59,7 @@ public class PedestrianSimulation {
             // Particle newParticle = board.advanceParticle(p, neighbours.get(p.getId()));
             p.advanceParticle(t, board.getDt(), neighbours.get(p.getId()));
 
-            if(p.getY() > Board.Y_PADDING) {
+            if(p.getY() > 0) {
                 nextState.add(p);
             }
         }

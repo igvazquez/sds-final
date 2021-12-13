@@ -16,6 +16,7 @@ public class Particle {
     double[] target;
     double mass;
     double radius;
+    boolean locked;
     Verlet integrator;
 
     public Particle(int id, double x, double y, double vx, double vy,
@@ -29,6 +30,7 @@ public class Particle {
         this.target = target;
         this.mass = mass;
         this.radius = radius;
+        this.locked = false;
     }
 
     public Particle(int id, double x, double y, double vx, double vy,

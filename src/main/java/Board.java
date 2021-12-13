@@ -21,12 +21,14 @@ public class Board {
     private final double beta;
     private final double dt;
     private final double doorWidth;
+    private final List<Turnstile> turnstiles;
     private final int M;
     private final Map<Integer, List<Particle>> cells;
     private final double referenceDt;
     private List<Particle> particles;
 
-    public Board(double l, double d, double minR, double maxR, double maxV, double tau,
+    public Board(double l, double d, int turnstiles, double transactionTime,
+                 double minR, double maxR, double maxV, double tau,
                  double beta, double Ve, int m, List<Particle> particles) {
         L = l;
         this.minR = minR;
@@ -34,13 +36,25 @@ public class Board {
         this.maxV = maxV;
         this.Ve = Ve;
         this.doorWidth = d;
+        this.turnstiles = new ArrayList<>(turnstiles);
         this.tau = tau;
         this.beta = beta;
         this.dt = Math.sqrt(60.0 / 120000);
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
+        generateTurnstiles(turnstiles, transactionTime);
         sortBoard(particles);
+    }
+
+    private void generateTurnstiles(final int t, final double transactionTime) {
+        if (L - 2*X_PADDING < t*doorWidth || t <= 0){
+            throw new IllegalArgumentException("Invalid amount of turnstiles");
+        }
+        var turnstilePadding = (L - 2*X_PADDING - t*doorWidth)/(t+1);
+        for (int i = 0; i < t; i++) {
+            turnstiles.add(new Turnstile(X_PADDING + (i+1)*turnstilePadding + i*doorWidth, Y_PADDING, 1.5, doorWidth, transactionTime));
+        }
     }
 
     public double getDoorWidth() {
@@ -83,7 +97,7 @@ public class Board {
     }
 
     private static boolean overlap(double x, double y, double r, double l, List<Particle> particles) {
-        if (x - r <= X_PADDING || x + r >= l - X_PADDING || y + r >= l - Y_PADDING || y + r <= Y_PADDING) {
+        if (x - r <= X_PADDING || x + r >= l - X_PADDING || y + r >= l - Y_PADDING || y - r <= Y_PADDING) {
             return true;
         }
         for (Particle p : particles) {
@@ -94,15 +108,15 @@ public class Board {
         return false;
     }
 
-    public static Board getRandomBoard(int n, double d, double l, int m, double minR,
-                                       double maxR, double maxV, double vd, double tau,
-                                       double beta, double ve,double maxMass) {
+    public static Board getRandomBoard(int n, double d, int turnstiles, double transactionTime, double l,
+                                       int m, double minR, double maxR, double minV, double maxV, double vd,
+                                       double tau, double beta, double ve,double maxMass) {
 
         List<Particle> particles = new ArrayList<>();
 
         double x, y, mass, radius;
         double[] vel;
-        Board board = new Board(l, d, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
+        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 
         int i;
@@ -113,9 +127,9 @@ public class Board {
                 radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 
-            vel = calculateVelocityToTarget(maxV, l, d, x, y);
-//            mass = Math.random() * maxMass;
-            Particle p = new Particle(i, x, y, vel[0], vel[1], vd, new double[]{l/2, Y_PADDING}, maxMass, radius);
+            var target = getParticleTarget(board.getTurnstiles(), l, x);
+            vel = calculateVelocityToTarget(minV, maxV, x, y, target, d);
+            Particle p = new Particle(i, x, y, vel[0], vel[1], vd, target, maxMass, radius);
             p.setIntegrator(new Verlet(p, sfm));
             particles.add(p);
         }
@@ -124,13 +138,17 @@ public class Board {
         return board;
     }
 
-    public static double[] calculateVelocityToTarget(final double maxV, final double l, final double doorWidth, final double x, final double y) {
-        double v = Math.random() * maxV;
-        final double leftLimit  = l/2 - doorWidth/2 + TARGET_TRIM*doorWidth;
-        final double rightLimit = l/2 + doorWidth/2 - TARGET_TRIM * doorWidth;
-        double dx = x < leftLimit || x > rightLimit
-                ? leftLimit + Math.random() * (rightLimit - leftLimit) - x : 0;
-        final double dy = -y;
+    private static double[] getParticleTarget(final List<Turnstile> turnstiles, final double l, final double x) {
+        var t = (l-2*X_PADDING) / turnstiles.size();
+        var turnstile = turnstiles.get((int)((x-X_PADDING)/t));
+
+        return new double[]{turnstile.getX() + turnstile.getWidth()/2, Y_PADDING};
+    }
+
+    public static double[] calculateVelocityToTarget(final double minV, final double maxV, final double x, final double y, final double[] target, final double doorWidth) {
+        double v = minV + Math.random() * (maxV - minV);
+        double dx = target[0] - x;
+        final double dy = target[1] - y;
         final double distance = Math.hypot(dx, dy);
 
         double vx = v * (dx / distance);
@@ -258,5 +276,11 @@ public class Board {
     public void updateParticles(final List<Particle> currentState) {
         this.particles = currentState;
         sortBoard(particles);
+    }
+
+    public void updateTurnstiles(final double t) {
+        for(final Turnstile turnstile : turnstiles){
+            turnstile.tryUnlock(t);
+        }
     }
 }

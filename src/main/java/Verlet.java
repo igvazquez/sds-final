@@ -29,7 +29,7 @@ public class Verlet {
     }
 
     public State[] step(double t, final double dt, final Set<Particle> neighbours) {
-        var f = force.getForce(particle, neighbours);
+        var f = force.getForce(particle, neighbours, t);
         if (prevRx == null)
             prevRx = estimatePrevR(currRx, currVx, f[0], dt, mass);
         if (prevRy == null)
