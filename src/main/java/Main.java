@@ -27,13 +27,6 @@ public class Main {
         double beta = 0;
         double transactionTime = 2;
 
-        int a = 1;
-        int b = 2;
-        int ea = 0;
-        int eb = 0;
-
-
-
 //        Board board = new Board(l, d, 1, transactionTime, minR, maxR, maxV, tau, beta, maxV, Board.optM(l, maxR), particles);
         Board board = Board.getRandomBoard(n, d, 3, transactionTime, l, Board.optM(l, maxR)-5, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 //        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
@@ -44,19 +37,5 @@ public class Main {
 
         PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
         simulation.simulate(iterations, true);
-    }
-
-    public int prode(int a, int b, int ea, int eb){
-        if (a == ea && b == eb){
-            return 12;
-        } else if(a>b && ea>eb){
-            return 5 + a==ea || b==eb ? 2 : 0;
-        } else if(a==b && ea==eb){
-            return 5;
-        }else if(a<b && ea<eb){
-            return 5;
-        }else{
-            return 0;
-        }
     }
 }
