@@ -22,9 +22,9 @@ public class SFM {
     }
 
     public double[] getAcceleration(final Particle p, final Set<Particle> neighbours, final double time) {
-        double[] Fg = new double[2]; // Granular Force
-        double[] Fs = new double[2]; // Social Force
-        double[] Fd; // Desire Force
+        double[] Fg = new double[2];    // Granular Force
+        double[] Fs = new double[2];    // Social Force
+        double[] Fd;                    // Desire Force
 
         Fd = calculateDesireForce(p);
 
@@ -121,7 +121,7 @@ public class SFM {
                         turnstile.lockTurnstile(p, time);
                     }
                 } else if(p.getX() - Board.X_PADDING > (i+1)*turnstilePadding + i*board.getDoorWidth()
-                        && p.getX() - Board.X_PADDING< (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() && turnstile.isLocked()){
+                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() && turnstile.isLocked()){
                     // Locked Turnstile BELOW
                     g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
                     wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
@@ -131,52 +131,15 @@ public class SFM {
                     bounce = true;
                 }
             }
-//            if (p.getX() <= board.getL() / 2 - board.getDoorWidth() / 2 || p.getX() >= board.getL() / 2 + board.getDoorWidth() / 2) {
-//                // WALL BELOW
-//                g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-//                wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
-//                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-//                niw = p.getNij(wall);
-//                tiw = p.getTangentVector(wall);
-//                // If it bounces against the walls of the turnstile
-//            } else if (p.getX() - p.getRadius() <= board.getL() / 2 - board.getDoorWidth() / 2) {
-//                // TURNSTILE WALL TO THE LEFT
-//                if (p.getY() > Board.getyPadding()) {
-//                    wall = new Particle(-1, (board.getL() / 2 - board.getDoorWidth() / 2), Board.getyPadding(), 0.0, 0.0,
-//                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-//                    g = p.centerDistanceTo(wall) > p.getRadius() ?
-//                            0 : p.getRadius() - p.centerDistanceTo(wall);
-//                    niw = p.getNij(wall);
-//                    tiw = p.getTangentVector(wall);
-//                } else {
-//                    // Wall (same y as particle, has its own x)
-//                    // Should this happen? Or do we guide the particle to the center if the turnstile is empty?
-//                    g = Math.abs(p.getX() - (board.getL() / 2 - board.getDoorWidth() / 2)) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getX() - (board.getL() / 2 - board.getDoorWidth() / 2));
-//                    wall = new Particle(-1, (board.getL() / 2 - board.getDoorWidth() / 2), p.getY(), 0.0, 0.0,
-//                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-//                    niw = p.getNij(wall);
-//                    tiw = p.getTangentVector(wall);
-//                }
-//
-//            } else if (p.getX() + p.getRadius() >= board.getL() / 2 + board.getDoorWidth() / 2) {
-//                // TURNSTILE WALL TO THE RIGHT
-//                if (p.getY() > Board.getyPadding()) {
-//                    wall = new Particle(-1, (board.getL() / 2 + board.getDoorWidth() / 2), Board.getyPadding(), 0.0, 0.0,
-//                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-//                    g = p.centerDistanceTo(wall) > p.getRadius() + wall.getRadius() ?
-//                            0 : p.getRadius() + wall.getRadius() - p.centerDistanceTo(wall);
-//                    niw = p.getNij(wall);
-//                    tiw = p.getTangentVector(wall);
-//                } else {
-//                    // Wall (same y as particle, has its own x)
-//                    // Should this happen? Or do we guide the particle to the center if the turnstile is empty?
-//                    g = Math.abs(p.getX() - (board.getL() / 2 + board.getDoorWidth() / 2)) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getX() - (board.getL() / 2 + board.getDoorWidth() / 2));
-//                    wall = new Particle(-1, (board.getL() / 2 + board.getDoorWidth() / 2), p.getY(), 0.0, 0.0,
-//                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-//                    niw = p.getNij(wall);
-//                    tiw = p.getTangentVector(wall);
-//                }
-//            }
+
+            if (p.getX() - Board.X_PADDING > t*turnstilePadding + t*board.getDoorWidth()){
+                g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
+                wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                niw = p.getNij(wall);
+                tiw = p.getTangentVector(wall);
+                bounce = true;
+            }
         }
         var prod = p.getVx() * tiw[0] + p.getVy() * tiw[1];
         var exp = A * Math.exp((p.getRadius() - p.centerDistanceTo(wall)) / B);
@@ -189,9 +152,8 @@ public class SFM {
 
     public double[] getForce(final Particle p, final Set<Particle> neighbours, final double time) {
         var a = getAcceleration(p, neighbours, time);
-        a[0] = p.getMass() * a[0];
-        a[1] = p.getMass() * a[1];
-        return a;
+
+        return new double[]{p.getMass() * a[0], p.getMass() * a[1]};
     }
 
     private double[] calculateGranularForce(final Particle p, final Particle other) {
@@ -211,6 +173,7 @@ public class SFM {
         var nij = p.getNij(other);
 
         var exp = A * Math.exp((p.getRadius() + other.getRadius() - p.centerDistanceTo(other)) / B);
+
 
         return new double[]{exp * nij[0], exp * nij[1]};
     }

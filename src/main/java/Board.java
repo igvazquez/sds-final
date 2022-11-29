@@ -26,6 +26,7 @@ public class Board {
     private final Map<Integer, List<Particle>> cells;
     private final double referenceDt;
     private List<Particle> particles;
+    private SFM sfm;
 
     public Board(double l, double d, int turnstiles, double transactionTime,
                  double minR, double maxR, double maxV, double tau,
@@ -114,17 +115,20 @@ public class Board {
 
         List<Particle> particles = new ArrayList<>();
 
-        double x, y, mass, radius;
+        double x, y, radius;
         double[] vel;
         Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
+        board.setSfm(sfm);
 
         int i;
         for (i = 0; i < n; i++) {
             do {
                 x = X_PADDING + Math.random() * (l-2*X_PADDING);
                 y = Y_PADDING + Math.random() * (l-2*Y_PADDING);
-                radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
+                // TODO: dynamic radius
+                //radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
+                radius = maxR;
             } while (overlap(x, y, radius, l, particles));
 
             var target = getParticleTarget(board.getTurnstiles(), l, x);
