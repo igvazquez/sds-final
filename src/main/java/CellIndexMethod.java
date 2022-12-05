@@ -87,12 +87,24 @@ public class CellIndexMethod {
             List<Particle> currentCell = board.getCell(currentIdx);
             for(Particle p : currentCell){
                 for(Particle n : board.getCell(neighbourIdx)){
-                    if (p.calculateDistance(n, board.getL(), per) < rc){
+                    if (p.collides(n)){
                         neighboursMap.get(p.getId()).add(n);
                         neighboursMap.get(n.getId()).add(p);
                     }
                 }
             }
+        }
+    }
+
+    public void calculateNeighborsBrute() {
+        List<Particle> boardParticles = board.getParticles();
+        for(Particle p1: boardParticles) {
+            Set<Particle> particleNeighbors = neighboursMap.get(p1.getId());
+            for (Particle p2: boardParticles) {
+                if(p1.collides(p2))
+                    particleNeighbors.add(p2);
+            }
+            neighboursMap.put(p1.getId(), particleNeighbors);
         }
     }
 
