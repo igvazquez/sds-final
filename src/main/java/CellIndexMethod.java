@@ -87,7 +87,8 @@ public class CellIndexMethod {
             List<Particle> currentCell = board.getCell(currentIdx);
             for(Particle p : currentCell){
                 for(Particle n : board.getCell(neighbourIdx)){
-                    if (p.collides(n)){
+                    if (p.collides(n) && p.getId() != n.getId()){
+                        //System.out.println("choque entre " + p.getId() + " y " + n.getId());
                         neighboursMap.get(p.getId()).add(n);
                         neighboursMap.get(n.getId()).add(p);
                     }
@@ -101,7 +102,7 @@ public class CellIndexMethod {
         for(Particle p1: boardParticles) {
             Set<Particle> particleNeighbors = neighboursMap.get(p1.getId());
             for (Particle p2: boardParticles) {
-                if(p1.collides(p2))
+                if(p1.collides(p2) && p1.getId() != p2.getId())
                     particleNeighbors.add(p2);
             }
             neighboursMap.put(p1.getId(), particleNeighbors);

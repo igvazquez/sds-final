@@ -40,7 +40,7 @@ public class Board {
         this.turnstiles = new ArrayList<>(turnstiles);
         this.tau = tau;
         this.beta = beta;
-        this.dt = Math.sqrt(60.0 / 120000) / 10;
+        this.dt = Math.sqrt(60.0 / 120000) / 15;
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
@@ -118,7 +118,7 @@ public class Board {
         double x, y, radius;
         double[] vel;
         Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
-        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
+        var sfm = new SFM(1.2E5, 2.4E5, 4000, 0.01, 0.3, board);
         board.setSfm(sfm);
 
         int i;

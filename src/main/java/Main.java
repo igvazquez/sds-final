@@ -15,11 +15,11 @@ public class Main {
 //        var particles = List.of(p1, p2, p3);
 
         var iterations = 100000;
-        int n = 35;
+        int n = 160;
         double d = 1.2;
         double l = 20;
-        double minR = 0.5;
-        double maxR = 0.5;
+        double minR = 0.4;
+        double maxR = 0.4;
         double m = 60;
         double minV = 0.5;
         double maxV = 0.7;
