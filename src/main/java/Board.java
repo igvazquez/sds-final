@@ -40,7 +40,7 @@ public class Board {
         this.turnstiles = new ArrayList<>(turnstiles);
         this.tau = tau;
         this.beta = beta;
-        this.dt = Math.sqrt(60.0 / 120000);
+        this.dt = Math.sqrt(60.0 / 120000) / 10;
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
@@ -160,7 +160,7 @@ public class Board {
     }
 
     public static int optM(final double l, final double rc) {
-        return (int) Math.floor(l / rc);
+        return (int) (Math.floor(l / rc) * 0.5);
     }
 
     public List<Particle> getCell(int idx) {
