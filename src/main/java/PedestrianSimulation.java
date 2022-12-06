@@ -32,9 +32,11 @@ public class PedestrianSimulation {
         int i = 0;
         try {
             while (!currentState.isEmpty() && i < maxIter) {
-                System.out.println("Iter: " + i);
+                if(i % 100 == 0)
+                    System.out.println("Iter: " + i);
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
-                cim.calculateNeighbours();
+                //cim.calculateNeighbours();
+                cim.calculateNeighborsBrute();
                 currentState = doStep(currentState, cim);
                 board.updateTurnstiles(t);
                 board.updateParticles(currentState);
