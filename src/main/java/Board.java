@@ -62,11 +62,11 @@ public class Board {
         return doorWidth;
     }
 
-    public static double getxPadding() {
+    public static double getXPadding() {
         return X_PADDING;
     }
 
-    public static double getyPadding() {
+    public static double getYPadding() {
         return Y_PADDING;
     }
 
@@ -126,9 +126,7 @@ public class Board {
             do {
                 x = X_PADDING + Math.random() * (l-2*X_PADDING);
                 y = Y_PADDING + Math.random() * (l-2*Y_PADDING);
-                // TODO: dynamic radius
-                //radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
-                radius = maxR;
+                radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 
             var target = getParticleTarget(board.getTurnstiles(), l, x);
@@ -165,10 +163,6 @@ public class Board {
         return (int) Math.floor(l / rc);
     }
 
-    public int getN() {
-        return particles.size();
-    }
-
     public List<Particle> getCell(int idx) {
         return cells.get(idx);
     }
@@ -184,97 +178,6 @@ public class Board {
             }
         }
         return b.toString();
-    }
-
-    public boolean isParticleInside(final Particle p) {
-        return !(p.getX() < 0) && !(p.getX() > L) && !(p.getY() < 0) && !(p.getY() > L);
-    }
-
-    public Particle removeParticle(final Particle p) {
-        particles.remove(p);
-        cells.get(calculateCellIndexOnBoard(p.getX(), p.getY())).remove(p);
-        return p;
-    }
-
-    public Particle advanceParticle(final Particle p, final Set<Particle> neighbours) {
-        double dx = 0;
-        double dy = 0;
-
-        if (p.getX() - p.getRadius() <= 0) {
-            dx += 1;
-        } else if (p.getX() + p.getRadius() >= L) {
-            dx -= 1;
-        }
-        if (p.getY() + p.getRadius() >= L) {
-            dy -= 1;
-        } else if ((p.getY() <= 0 && p.getY() + p.getRadius() >= 0) || (p.getY() > 0 && p.getY() - p.getRadius() <= 0)) {
-            if (p.getX() <= L/2 - doorWidth/2 || p.getX() >= L/2 + doorWidth/2) {
-                dy += 1;
-            } else if (p.getX() - p.getRadius() <= L/2 - doorWidth/2) {
-                final double diffX = p.getX() - L/2 + doorWidth/2;
-                final double distance = Math.hypot(diffX, p.getY());
-
-                dx += diffX / distance;
-                dy += p.getY() / distance;
-            } else if (p.getX() + p.getRadius() >= L/2 + doorWidth/2) {
-                final double diffX = p.getX() -  L/2 - doorWidth/2;
-                final double distance = Math.hypot(diffX, p.getY());
-
-                dx += diffX / distance;
-                dy += p.getY() / distance;
-            }
-        }
-
-        for(final Particle other : neighbours) {
-            if(p.getId() != other.getId() && p.collides(other)){
-                double diffX = p.getX() - other.getX();
-                double diffY = p.getY() - other.getY();
-                double distance = Math.hypot(diffX, diffY);
-
-                dx += diffX / distance;
-                dy += diffY / distance;
-            }
-        }
-
-        final double newVx;
-        final double newVy;
-        final double newR;
-        if(dx == 0 && dy == 0) {
-            newR = Math.min(maxR, p.getRadius() + maxR/(tau/dt));
-
-            final double newVMod = maxV * Math.pow((newR - minR) / (maxR - minR), beta);
-            boolean escaped = p.getY() <= 0;
-            final double targetDirX = nextTargetX(p.getX(), escaped);
-            final double targetDirY = nextTargetY(p.getY(), escaped);
-            final double targetDirMod = Math.hypot(targetDirX, targetDirY);
-
-            newVx = newVMod * (targetDirX / targetDirMod);
-            newVy = newVMod * (targetDirY / targetDirMod);
-        } else {
-            final double escapeMod = Math.hypot(dx, dy);
-            newVx   = Ve * (dx / escapeMod);
-            newVy   = Ve * (dy / escapeMod);
-            newR    = minR;
-        }
-
-        return null;
-//        return new Particle(p.getId(), p.getX() + newVx*dt, p.getY() + newVy*dt, newVx, newVy, p.getMass(), newR);
-    }
-
-    private double nextTargetX(final double x, final boolean escaped) {
-        final double leftLimit  = escaped ?
-                (L/2 - TARGET_LENGTH/2) + TARGET_TRIM * TARGET_LENGTH
-                : L/2 - doorWidth/2 + TARGET_TRIM*doorWidth;
-        final double rightLimit = escaped ?
-                (L/2 + TARGET_LENGTH/2) - TARGET_TRIM * TARGET_LENGTH
-                : L/2 + doorWidth/2 - TARGET_TRIM * doorWidth;
-
-        return x < leftLimit || x > rightLimit
-                ? leftLimit + Math.random() * (rightLimit - leftLimit) - x : 0;
-    }
-
-    private double nextTargetY(final double y, final boolean escaped) {
-        return escaped ? TARGET_DISTANCE_FROM_DOOR - y : -y;
     }
 
     public void updateParticles(final List<Particle> currentState) {

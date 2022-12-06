@@ -58,28 +58,28 @@ public class SFM {
         Particle wall = new Particle(-1, 0, 0, 0.0, 0.0,
                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
 
-        if (p.getX() - p.getRadius() <= 0 + Board.getxPadding()) {
+        if (p.getX() - p.getRadius() <= 0 + Board.getXPadding()) {
             // WALL TO THE LEFT
-            g = Math.abs(p.getX() - Board.getxPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(Board.getxPadding() - p.getX());
-            wall = new Particle(-1, Board.getxPadding(), p.getY(), 0.0, 0.0,
+            g = Math.abs(p.getX() - Board.getXPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(Board.getXPadding() - p.getX());
+            wall = new Particle(-1, Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if (p.getX() + p.getRadius() >= board.getL() - Board.getxPadding()) {
+        } else if (p.getX() + p.getRadius() >= board.getL() - Board.getXPadding()) {
             // WALL TO THE RIGHT
-            g = Math.abs(board.getL() - Board.getxPadding() - p.getX()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getxPadding() - p.getX());
-            wall = new Particle(-1, board.getL() - Board.getxPadding(), p.getY(), 0.0, 0.0,
+            g = Math.abs(board.getL() - Board.getXPadding() - p.getX()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getXPadding() - p.getX());
+            wall = new Particle(-1, board.getL() - Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if (p.getY() + p.getRadius() >= board.getL() - Board.getyPadding()) {
+        } else if (p.getY() + p.getRadius() >= board.getL() - Board.getYPadding()) {
             // WALL ABOVE
-            g = Math.abs((board.getL() - Board.getyPadding()) - p.getY()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getyPadding() - p.getY());
-            wall = new Particle(-1, p.getX(), board.getL() - Board.getyPadding(), 0.0, 0.0,
+            g = Math.abs((board.getL() - Board.getYPadding()) - p.getY()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getYPadding() - p.getY());
+            wall = new Particle(-1, p.getX(), board.getL() - Board.getYPadding(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if ((p.getY() <= Board.getyPadding() && p.getY() + p.getRadius() >= Board.getyPadding()) || (p.getY() > Board.getyPadding() && p.getY() - p.getRadius() <= Board.getyPadding())) {
+        } else if ((p.getY() <= Board.getYPadding() && p.getY() + p.getRadius() >= Board.getYPadding()) || (p.getY() > Board.getYPadding() && p.getY() - p.getRadius() <= Board.getYPadding())) {
             // TODO: Fix condition that locates turnstiles
             // If it's not in front of a turnstile
             var t = board.getTurnstiles().size();
@@ -90,8 +90,8 @@ public class SFM {
                 if(p.getX() - Board.X_PADDING > i*turnstilePadding + i*board.getDoorWidth()
                         && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + i*board.getDoorWidth()){
                     // WALL BELOW
-                    g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                    wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
+                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                    wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     niw = p.getNij(wall);
                     tiw = p.getTangentVector(wall);
@@ -102,7 +102,7 @@ public class SFM {
                         && !turnstile.isLocked()){
                     if (p.getX() - p.getRadius() - Board.X_PADDING <= (i+1)*turnstilePadding + i*board.getDoorWidth()){
                         // Left corner of turnstile
-                        wall = new Particle(-1, (i+1)*turnstilePadding + i*board.getDoorWidth() + Board.X_PADDING, Board.getyPadding(), 0.0, 0.0,
+                        wall = new Particle(-1, (i+1)*turnstilePadding + i*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                         g = p.centerDistanceTo(wall) > p.getRadius() ?
                                 0 : p.getRadius() - p.centerDistanceTo(wall);
@@ -110,7 +110,7 @@ public class SFM {
                         tiw = p.getTangentVector(wall);
                     } else if (p.getX() + p.getRadius() - Board.X_PADDING >= (i+1)*turnstilePadding + (i+1)*board.getDoorWidth()){
                         // Right corner of turnstile
-                        wall = new Particle(-1, (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING, Board.getyPadding(), 0.0, 0.0,
+                        wall = new Particle(-1, (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                         g = p.centerDistanceTo(wall) > p.getRadius() ?
                                 0 : p.getRadius() - p.centerDistanceTo(wall);
@@ -123,8 +123,8 @@ public class SFM {
                 } else if(p.getX() - Board.X_PADDING > (i+1)*turnstilePadding + i*board.getDoorWidth()
                         && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() && turnstile.isLocked()){
                     // Locked Turnstile BELOW
-                    g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                    wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
+                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                    wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     niw = p.getNij(wall);
                     tiw = p.getTangentVector(wall);
@@ -133,8 +133,8 @@ public class SFM {
             }
 
             if (p.getX() - Board.X_PADDING > t*turnstilePadding + t*board.getDoorWidth()){
-                g = Math.abs(p.getY() - Board.getyPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getyPadding());
-                wall = new Particle(-1, p.getX(), Board.getyPadding(), 0.0, 0.0,
+                g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                         0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                 niw = p.getNij(wall);
                 tiw = p.getTangentVector(wall);

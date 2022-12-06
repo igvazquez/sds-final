@@ -69,8 +69,9 @@ public class PedestrianSimulation {
     private void writeBoardToFile() throws IOException {
         FileWriter pos = new FileWriter("testBoard.xyz", false);
         BufferedWriter buffer = new BufferedWriter(pos);
+        var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
         for(List<OutputData> particles : states) {
-            buffer.write(String.valueOf(particles.size() + 12));
+            buffer.write(String.valueOf(particles.size() + dummyParticlesSize));
             buffer.newLine();
             buffer.newLine();
             writeDummyParticles(buffer);
@@ -87,27 +88,31 @@ public class PedestrianSimulation {
     private void writeDummyParticles(final BufferedWriter buffer) throws IOException {
         buffer.write("201 0 0 0 0 0.0001");
         buffer.newLine();
-        buffer.write("202 20 0 0 0 0.0001");
+        buffer.write("202 "+board.getL()+" 0 0 0 0.0001");
         buffer.newLine();
-        buffer.write("203 0 20 0 0 0.0001");
+        buffer.write("203 0 "+board.getL()+" 0 0 0.0001");
         buffer.newLine();
-        buffer.write("204 20 20 0 0 0.0001");
+        buffer.write("204 "+board.getL()+" "+board.getL()+" 0 0 0.0001");
         buffer.newLine();
-        buffer.write("214 5 18 0 0 0.05");
+        buffer.write("214 "+Board.getXPadding()+" "+Board.getYPadding()+" 0 0 0.05");
         buffer.newLine();
-        buffer.write("215 15 18 0 0 0.05");
+        buffer.write("215 "+(board.getL()-Board.getXPadding())+" "+Board.getYPadding()+" 0 0 0.05");
         buffer.newLine();
-        buffer.write("216 5 2 0 0 0.05");
+        buffer.write("216 "+Board.getXPadding()+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
         buffer.newLine();
-        buffer.write("217 15 2 0 0 0.05");
+        buffer.write("217 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
         buffer.newLine();
-        buffer.write("205 "+ ((board.getL()/2) - this.board.getDoorWidth()/2) +" 0 0 0 0.1");
-        buffer.newLine();
-        buffer.write("206 "+(board.getL()/2 + this.board.getDoorWidth()/2)+" 0 0 0 0.1");
-        buffer.newLine();
-        buffer.write("207 "+((board.getL()/2) - this.board.getDoorWidth()/2)+" 2 0 0 0.1");
-        buffer.newLine();
-        buffer.write("208 "+(board.getL()/2 + this.board.getDoorWidth()/2)+" 2 0 0 0.1");
-        buffer.newLine();
+
+        for(int i = 0; i < board.getTurnstiles().size(); i++){
+            var t = board.getTurnstiles().get(i);
+            buffer.write((-1-4*i)+ " " + t.getX() +" 0 0 0 0.1");
+            buffer.newLine();
+            buffer.write((-2-4*i)+ " " + t.getX() +" "+t.getY()+" 0 0 0.1");
+            buffer.newLine();
+            buffer.write((-3-4*i)+ " " + (t.getX()+t.getWidth()) +" 0 0 0 0.1");
+            buffer.newLine();
+            buffer.write((-4-4*i)+ " " + (t.getX()+t.getWidth()) +" "+t.getY()+" 0 0 0.1");
+            buffer.newLine();
+        }
     }
 }

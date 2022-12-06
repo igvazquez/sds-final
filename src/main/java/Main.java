@@ -15,11 +15,11 @@ public class Main {
 //        var particles = List.of(p1, p2, p3);
 
         var iterations = 100000;
-        int n = 35;
+        int n = 20;
         double d = 1.2;
-        double l = 20;
+        double l = 30;
         double minR = 0.5;
-        double maxR = 0.5;
+        double maxR = 0.58;
         double m = 60;
         double minV = 0.5;
         double maxV = 0.7;
@@ -28,7 +28,7 @@ public class Main {
         double transactionTime = 2;
 
 //        Board board = new Board(l, d, 1, transactionTime, minR, maxR, maxV, tau, beta, maxV, Board.optM(l, maxR), particles);
-        Board board = Board.getRandomBoard(n, d, 3, transactionTime, l, Board.optM(l, maxR)-5, minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+        Board board = Board.getRandomBoard(n, d, 3, transactionTime, l, Board.optM(l, maxR), minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 //        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 //        board.setSfm(sfm);
 //        p1.setIntegrator(new Verlet(p1, board.getSfm()));
