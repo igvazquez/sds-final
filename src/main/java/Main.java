@@ -18,7 +18,8 @@ public class Main {
         int n = 160;
         double d = 1.2;
         double l = 30;
-        double minR = 0.5;
+        int turnstiles = 5;
+        double minR = 0.3;
         double maxR = 0.58;
         double m = 60;
         double minV = 0.5;
@@ -28,7 +29,7 @@ public class Main {
         double transactionTime = 2;
 
 //        Board board = new Board(l, d, 1, transactionTime, minR, maxR, maxV, tau, beta, maxV, Board.optM(l, maxR), particles);
-        Board board = Board.getRandomBoard(n, d, 3, transactionTime, l, Board.optM(l, maxR), minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+        Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR), minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 //        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
 //        board.setSfm(sfm);
 //        p1.setIntegrator(new Verlet(p1, board.getSfm()));

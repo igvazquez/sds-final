@@ -32,8 +32,10 @@ public class PedestrianSimulation {
         int i = 0;
         try {
             while (!currentState.isEmpty() && i < maxIter) {
-                if(i % 100 == 0)
+                if(i % 5000 == 0) {
                     System.out.println("Iter: " + i);
+                    writeBoardToFile();
+                }
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 //cim.calculateNeighbours();
                 cim.calculateNeighborsBrute();
@@ -69,7 +71,7 @@ public class PedestrianSimulation {
     }
 
     private void writeBoardToFile() throws IOException {
-        FileWriter pos = new FileWriter("testBoard.xyz", false);
+        FileWriter pos = new FileWriter("testBoard.xyz", true);
         BufferedWriter buffer = new BufferedWriter(pos);
         var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
         for(List<OutputData> particles : states) {
@@ -85,6 +87,7 @@ public class PedestrianSimulation {
         buffer.flush();
         buffer.close();
         pos.close();
+        states.clear();
     }
 
     private void writeDummyParticles(final BufferedWriter buffer) throws IOException {

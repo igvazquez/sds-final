@@ -51,6 +51,10 @@ public class SFM {
         return a;
     }
 
+    private static double wallCheat(double magnitudeInsideWall) {
+        return Math.abs(magnitudeInsideWall) > 0.008 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.01 : magnitudeInsideWall;
+    }
+
     private double[] calculateWallForce(final Particle p, final double time) {
         double d, g = 0;
         double[] niw = new double[2];
@@ -60,21 +64,21 @@ public class SFM {
 
         if (p.getX() - p.getRadius() <= 0 + Board.getXPadding()) {
             // WALL TO THE LEFT
-            g = Math.abs(p.getX() - Board.getXPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(Board.getXPadding() - p.getX());
+            g = Math.abs(p.getX() - Board.getXPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(Board.getXPadding() - p.getX()));
             wall = new Particle(-1, Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
         } else if (p.getX() + p.getRadius() >= board.getL() - Board.getXPadding()) {
             // WALL TO THE RIGHT
-            g = Math.abs(board.getL() - Board.getXPadding() - p.getX()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getXPadding() - p.getX());
+            g = Math.abs(board.getL() - Board.getXPadding() - p.getX()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(board.getL() - Board.getXPadding() - p.getX()));
             wall = new Particle(-1, board.getL() - Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
         } else if (p.getY() + p.getRadius() >= board.getL() - Board.getYPadding()) {
             // WALL ABOVE
-            g = Math.abs((board.getL() - Board.getYPadding()) - p.getY()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(board.getL() - Board.getYPadding() - p.getY());
+            g = Math.abs((board.getL() - Board.getYPadding()) - p.getY()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(board.getL() - Board.getYPadding() - p.getY()));
             wall = new Particle(-1, p.getX(), board.getL() - Board.getYPadding(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             niw = p.getNij(wall);
@@ -90,7 +94,7 @@ public class SFM {
                 if(p.getX() - Board.X_PADDING > i*turnstilePadding + i*board.getDoorWidth()
                         && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + i*board.getDoorWidth()){
                     // WALL BELOW
-                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     niw = p.getNij(wall);
@@ -104,16 +108,18 @@ public class SFM {
                         // Left corner of turnstile
                         wall = new Particle(-1, (i+1)*turnstilePadding + i*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-                        g = p.centerDistanceTo(wall) > p.getRadius() ?
-                                0 : p.getRadius() - p.centerDistanceTo(wall);
+                        g = 0;
+                        if(p.collides(wall))
+                            g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));
                         niw = p.getNij(wall);
                         tiw = p.getTangentVector(wall);
                     } else if (p.getX() + p.getRadius() - Board.X_PADDING >= (i+1)*turnstilePadding + (i+1)*board.getDoorWidth()){
                         // Right corner of turnstile
                         wall = new Particle(-1, (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-                        g = p.centerDistanceTo(wall) > p.getRadius() ?
-                                0 : p.getRadius() - p.centerDistanceTo(wall);
+                        g = 0;
+                        if(p.collides(wall))
+                            g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));
                         niw = p.getNij(wall);
                         tiw = p.getTangentVector(wall);
                     }else{
@@ -123,7 +129,7 @@ public class SFM {
                 } else if(p.getX() - Board.X_PADDING > (i+1)*turnstilePadding + i*board.getDoorWidth()
                         && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() && turnstile.isLocked()){
                     // Locked Turnstile BELOW
-                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     niw = p.getNij(wall);
@@ -133,7 +139,7 @@ public class SFM {
             }
 
             if (p.getX() - Board.X_PADDING > t*turnstilePadding + t*board.getDoorWidth()){
-                g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : p.getRadius() - Math.abs(p.getY() - Board.getYPadding());
+                g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
                 wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                         0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                 niw = p.getNij(wall);
