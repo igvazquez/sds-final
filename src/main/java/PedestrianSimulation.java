@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 @Data
 public class PedestrianSimulation {
 
-    private List<List<OutputData>> states = new LinkedList<>();
+    private List<List<OutputData.ParticleOutputData>> states = new LinkedList<>();
+    private OutputData outputData = new OutputData();
     private final Board board;
+    private final int startParticles;
     private final double rc;
     private final double beta;
     private final double tau;
@@ -22,11 +24,12 @@ public class PedestrianSimulation {
         this.beta = beta;
         this.tau = tau;
         this.t = 0;
+        this.startParticles = board.getParticles().size();
     }
 
     public void simulate(final int maxIter, final boolean logToFile) throws IOException {
         List<Particle> currentState = board.getParticles();
-        states.add(currentState.stream().map(OutputData::new).collect(Collectors.toList()));
+        states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
         CellIndexMethod cim;
 
         int i = 0;
@@ -35,6 +38,7 @@ public class PedestrianSimulation {
                 if(i % 5000 == 0) {
                     System.out.println("Iter: " + i);
                     writeBoardToFile();
+                    outputData.writeTimesToFile(i == 5000);
                 }
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 //cim.calculateNeighbours();
@@ -42,7 +46,7 @@ public class PedestrianSimulation {
                 currentState = doStep(currentState, cim);
                 board.updateTurnstiles(t);
                 board.updateParticles(currentState);
-                states.add(currentState.stream().map(OutputData::new).collect(Collectors.toList()));
+                states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
                 i++;
             }
         } catch (IllegalArgumentException e) {
@@ -51,6 +55,7 @@ public class PedestrianSimulation {
         } finally {
             if (logToFile){
                 writeBoardToFile();
+                outputData.writeTimesToFile(i < 5000);
             }
         }
     }
@@ -67,6 +72,7 @@ public class PedestrianSimulation {
                 nextState.add(p);
             }
         }
+        outputData.getEscapeData().put(this.t, startParticles - nextState.size());
         return nextState;
     }
 
@@ -74,12 +80,12 @@ public class PedestrianSimulation {
         FileWriter pos = new FileWriter("testBoard.xyz", true);
         BufferedWriter buffer = new BufferedWriter(pos);
         var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
-        for(List<OutputData> particles : states) {
+        for(List<OutputData.ParticleOutputData> particles : states) {
             buffer.write(String.valueOf(particles.size() + dummyParticlesSize));
             buffer.newLine();
             buffer.newLine();
             writeDummyParticles(buffer);
-            for(OutputData p : particles) {
+            for(OutputData.ParticleOutputData p : particles) {
                 buffer.write(p.getId() + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius());
                 buffer.newLine();
             }
