@@ -3,6 +3,8 @@ import lombok.Value;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -19,6 +21,13 @@ public class OutputData {
     }
 
     public void writeTimesToFile(boolean isFirstWrite) throws IOException {
+        if(isFirstWrite) {
+            try {
+                Files.delete(Paths.get("times.csv"));
+            } catch (Exception e) {
+
+            }
+        }
         FileWriter pos = new FileWriter("times.csv", true);
         BufferedWriter buffer = new BufferedWriter(pos);
         if(isFirstWrite) {

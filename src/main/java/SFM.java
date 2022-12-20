@@ -52,7 +52,7 @@ public class SFM {
     }
 
     private static double wallCheat(double magnitudeInsideWall) {
-        return Math.abs(magnitudeInsideWall) > 0.008 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.01 : magnitudeInsideWall;
+        return Math.abs(magnitudeInsideWall) > 0.001 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.0001 : magnitudeInsideWall;
     }
 
     private double[] calculateWallForce(final Particle p, final double time) {
@@ -107,7 +107,7 @@ public class SFM {
                     if (p.getX() - p.getRadius() - Board.X_PADDING <= (i+1)*turnstilePadding + i*board.getDoorWidth()){
                         // Left corner of turnstile
                         wall = new Particle(-1, (i+1)*turnstilePadding + i*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
-                                0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
                         g = 0;
                         if(p.collides(wall))
                             g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));
@@ -116,7 +116,7 @@ public class SFM {
                     } else if (p.getX() + p.getRadius() - Board.X_PADDING >= (i+1)*turnstilePadding + (i+1)*board.getDoorWidth()){
                         // Right corner of turnstile
                         wall = new Particle(-1, (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
-                                0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
                         g = 0;
                         if(p.collides(wall))
                             g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));

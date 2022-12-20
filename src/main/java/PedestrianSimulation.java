@@ -3,6 +3,8 @@ import lombok.Data;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,8 @@ public class PedestrianSimulation {
             while (!currentState.isEmpty() && i < maxIter) {
                 if(i % 5000 == 0) {
                     System.out.println("Iter: " + i);
-                    writeBoardToFile();
-                    outputData.writeTimesToFile(i == 5000);
+                    writeBoardToFile(i == 0);
+                    outputData.writeTimesToFile(i == 0);
                 }
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 //cim.calculateNeighbours();
@@ -50,11 +52,11 @@ public class PedestrianSimulation {
                 i++;
             }
         } catch (IllegalArgumentException e) {
-            System.out.println("exploto en " + i);
+            System.out.println("exploto en " + i + " a t=" + t);
             System.out.println(e.getMessage());
         } finally {
             if (logToFile){
-                writeBoardToFile();
+                writeBoardToFile(i < 5000);
                 outputData.writeTimesToFile(i < 5000);
             }
         }
@@ -76,7 +78,14 @@ public class PedestrianSimulation {
         return nextState;
     }
 
-    private void writeBoardToFile() throws IOException {
+    private void writeBoardToFile(boolean isFirstWrite) throws IOException {
+        if(isFirstWrite) {
+            try {
+                Files.delete(Paths.get("testBoard.xyz"));
+            } catch (Exception e) {
+
+            }
+        }
         FileWriter pos = new FileWriter("testBoard.xyz", true);
         BufferedWriter buffer = new BufferedWriter(pos);
         var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;

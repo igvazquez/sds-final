@@ -85,7 +85,7 @@ public class Board {
     public void divideParticles() {
         for (Particle p : particles) {
             if (p.getX() < 0 || p.getX() > L || p.getY() < 0 || p.getY() > L) {
-                throw new IllegalArgumentException("Partícula fuera de los límites." + "X: " + p.getX() + " " + "Y: " + p.getY());
+                throw new IllegalArgumentException("Partícula " + p.getId() + " fuera de los límites." + "X: " + p.getX() + " " + "Y: " + p.getY());
             }
             cells.get(calculateCellIndexOnBoard(p.getX(), p.getY())).add(p);
         }
@@ -118,7 +118,7 @@ public class Board {
         double x, y, radius;
         double[] vel;
         Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
-        var sfm = new SFM(1.2E5, 2.4E5, 4000, 0.01, 0.05, board);
+        var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
         board.setSfm(sfm);
 
         int i;
