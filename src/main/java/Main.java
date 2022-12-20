@@ -16,7 +16,7 @@ public class Main {
 
         var iterations = 100000;
         int n = 160;
-        double d = 1.2;
+        double d = 1.6;
         double l = 30;
         int turnstiles = 5;
         double minR = 0.3;
