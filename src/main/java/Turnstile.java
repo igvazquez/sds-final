@@ -6,6 +6,7 @@ import java.util.List;
 @Data
 public class Turnstile {
 
+
     // Coordinates indicate the top left of the turnstile
     double x;
     double y;

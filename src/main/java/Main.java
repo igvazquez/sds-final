@@ -36,7 +36,7 @@ public class Main {
 //        p2.setIntegrator(new Verlet(p2, board.getSfm()));
 //        p3.setIntegrator(new Verlet(p3, board.getSfm()));
 
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "distance");
         simulation.simulate(iterations, true);
     }
 }

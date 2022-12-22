@@ -15,6 +15,7 @@ public class Board {
     private final double L;
     private final double minR;
     private final double maxR;
+    private final double minV;
     private final double maxV;
     private final double Ve;
     private final double tau;
@@ -26,18 +27,21 @@ public class Board {
     private final Map<Integer, List<Particle>> cells;
     private final double referenceDt;
     private List<Particle> particles;
+    private List<Particle> assignableParticles;
     private SFM sfm;
 
     public Board(double l, double d, int turnstiles, double transactionTime,
-                 double minR, double maxR, double maxV, double tau,
+                 double minR, double maxR, double minV, double maxV, double tau,
                  double beta, double Ve, int m, List<Particle> particles) {
         L = l;
         this.minR = minR;
         this.maxR = maxR;
+        this.minV = minV;
         this.maxV = maxV;
         this.Ve = Ve;
         this.doorWidth = d;
         this.turnstiles = new ArrayList<>(turnstiles);
+        this.assignableParticles = new ArrayList<>();
         this.tau = tau;
         this.beta = beta;
         this.dt = Math.sqrt(60.0 / 120000) / 10;
@@ -109,6 +113,61 @@ public class Board {
         return false;
     }
 
+    public void assignParticles() {
+        double[] vel;
+        List<Particle> toRemove = new LinkedList<>();
+
+        for(Turnstile t : turnstiles) {
+            for(Particle p : assignableParticles) {
+                Particle tParticle = new Particle(-1, t.getX(), t.getY(), 0.0, 0.0, 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                if(p.distanceTo(tParticle) < 5) {
+                    t.targeted.add(p);
+                    if(p.getY() <= L/2) {
+                        //asignacion inicial a aquellos que ya estan en zona de decision
+                        //en primera instancia cuando molinetes sin particulas asignadas
+                        var target = getParticleTarget(getTurnstiles(), L, p.getX());
+                        vel = calculateVelocityToTarget(p.vx, p.vy, p.getX(), p.getY(), target);
+                        p.setVx(vel[0]);
+                        p.setVy(vel[1]);
+                        p.setTarget(target);
+                        toRemove.add(p);
+                    }
+                }
+            }
+            assignableParticles.removeAll(toRemove);
+        }
+    }
+
+    public void assignTurnstiles(String mode) {
+        double[] vel;
+        double[] target;
+        List<Particle> toRemove = new ArrayList<>();
+        for (Particle p: assignableParticles) {
+            if(p.getY() <= L/2) {
+                // area de decision
+                if(mode.equals("distance")) {
+                    // molinete mas cercano
+                    target = getParticleTarget(getTurnstiles(), L, p.getX());
+                } else {
+                    //dame el mas cercano
+                    Turnstile free = turnstiles
+                            .stream()
+                            .min(Comparator.comparing(Turnstile::getTargeted,
+                                    Comparator.comparingInt(List::size))).get();
+                    //poner target a la particula, asignar particula a molinete
+                    free.targeted.add(p);
+                    target = new double[]{free.getX() + free.getWidth()/2, Y_PADDING};
+                }
+                vel = calculateVelocityToTarget(p.vx, p.vy, p.getX(), p.getY(), target);
+                p.setTarget(target);
+                p.setVx(vel[0]);
+                p.setVy(vel[1]);
+                toRemove.add(p);
+            }
+        }
+        assignableParticles.removeAll(toRemove);
+    }
+
     public static Board getRandomBoard(int n, double d, int turnstiles, double transactionTime, double l,
                                        int m, double minR, double maxR, double minV, double maxV, double vd,
                                        double tau, double beta, double ve,double maxMass) {
@@ -117,7 +176,7 @@ public class Board {
 
         double x, y, radius;
         double[] vel;
-        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, maxV, tau, beta, ve, m, new ArrayList<>());
+        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, minV, maxV, tau, beta, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
         board.setSfm(sfm);
 
@@ -129,7 +188,7 @@ public class Board {
                 radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 
-            var target = getParticleTarget(board.getTurnstiles(), l, x);
+            var target = new double[]{0.0, -1000}; //   getParticleTarget(board.getTurnstiles(), l, x);
             vel = calculateVelocityToTarget(minV, maxV, x, y, target, d);
             Particle p = new Particle(i, x, y, vel[0], vel[1], vd, target, maxMass, radius);
             p.setIntegrator(new Verlet(p, sfm));
@@ -137,6 +196,7 @@ public class Board {
         }
 
         board.setParticles(particles);
+        board.assignableParticles.addAll(particles);
         return board;
     }
 
@@ -145,6 +205,18 @@ public class Board {
         var turnstile = turnstiles.get((int)((x-X_PADDING)/t));
 
         return new double[]{turnstile.getX() + turnstile.getWidth()/2, Y_PADDING};
+    }
+
+    public static double[] calculateVelocityToTarget(final double vx, final double vy, final double x, final double y, final double[] target) {
+        double dx = target[0] - x;
+        final double dy = target[1] - y;
+        final double distance = Math.hypot(dx, dy);
+        final double v = Math.hypot(vx, vy);
+
+        double newVx = v * (dx / distance);
+        double newVy = v * (dy / distance);
+
+        return new double[]{newVx, newVy};
     }
 
     public static double[] calculateVelocityToTarget(final double minV, final double maxV, final double x, final double y, final double[] target, final double doorWidth) {

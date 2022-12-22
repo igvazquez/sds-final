@@ -15,13 +15,15 @@ public class PedestrianSimulation {
     private OutputData outputData = new OutputData();
     private final Board board;
     private final int startParticles;
+    private final String decisionMode;
     private final double rc;
     private final double beta;
     private final double tau;
     private double t;
 
-    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau) {
+    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode) {
         this.board = board;
+        this.decisionMode = decisionMode;
         this.rc = rc;
         this.beta = beta;
         this.tau = tau;
@@ -33,6 +35,9 @@ public class PedestrianSimulation {
         List<Particle> currentState = board.getParticles();
         states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
         CellIndexMethod cim;
+
+        if(!decisionMode.equals("distance"))
+            board.assignParticles();
 
         int i = 0;
         try {
@@ -46,6 +51,7 @@ public class PedestrianSimulation {
                 //cim.calculateNeighbours();
                 cim.calculateNeighborsBrute();
                 currentState = doStep(currentState, cim);
+                board.assignTurnstiles(decisionMode);
                 board.updateTurnstiles(t);
                 board.updateParticles(currentState);
                 states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
