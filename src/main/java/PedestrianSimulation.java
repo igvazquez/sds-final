@@ -41,7 +41,7 @@ public class PedestrianSimulation {
                 if(i % 5000 == 0) {
                     System.out.println("Iter: " + i + " Particles Left: " + board.getParticles().size());
                     outputData.writeBoardToFile(states);
-                    outputData.writeTimesToFile(i == 0);
+                    outputData.writeTimesToFile();
                 }
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 //cim.calculateNeighbours();
@@ -58,7 +58,7 @@ public class PedestrianSimulation {
         } finally {
             if (logToFile){
                 outputData.writeBoardToFile(states);
-                outputData.writeTimesToFile(i < 5000);
+                outputData.writeTimesToFile();
                 outputData.closeFileWriter();
             }
         }

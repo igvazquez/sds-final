@@ -24,18 +24,19 @@ public class OutputData {
         this.timesFw = new FileWriter(String.format("timesN=%d.csv", board.getParticles().size()));
         this.densityFw = new FileWriter(String.format("density_A=%,.2f.csv", densityAnalysisY*board.getRealWidth()));
         this.particlesFw = new FileWriter("particles.xyz");
+
+        timesFw.write("time;escaped_particles");
+        timesFw.write('\n');
+
+        densityFw.write("density");
+        densityFw.write('\n');
     }
 
     public Map<Double, Integer> getEscapeData() {
         return escapeData;
     }
 
-    public void writeTimesToFile(final boolean isFirstWrite) throws IOException {
-        if(isFirstWrite) {
-            timesFw.write("time;escaped_particles");
-            timesFw.write('\n');
-        }
-
+    public void writeTimesToFile() throws IOException {
         for(Map.Entry<Double, Integer> time : escapeData.entrySet()) {
             timesFw.write(time.getKey().toString() + ";" + time.getValue().toString());
             timesFw.write('\n');
