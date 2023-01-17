@@ -70,6 +70,13 @@ public class Board {
         return Y_PADDING;
     }
 
+    public double getRealWidth(){
+        return L - 2*X_PADDING;
+    }
+
+    public double getRealHeight(){
+        return L - 2*Y_PADDING;
+    }
     public double getL() {
         return L;
     }
@@ -130,7 +137,7 @@ public class Board {
             } while (overlap(x, y, radius, l, particles));
 
             var target = getParticleTarget(board.getTurnstiles(), l, x);
-            vel = calculateVelocityToTarget(minV, maxV, x, y, target, d);
+            vel = calculateVelocityToTarget(minV, maxV, x, y, target);
             Particle p = new Particle(i, x, y, vel[0], vel[1], vd, target, maxMass, radius);
             p.setIntegrator(new Verlet(p, sfm));
             particles.add(p);
@@ -147,7 +154,7 @@ public class Board {
         return new double[]{turnstile.getX() + turnstile.getWidth()/2, Y_PADDING};
     }
 
-    public static double[] calculateVelocityToTarget(final double minV, final double maxV, final double x, final double y, final double[] target, final double doorWidth) {
+    public static double[] calculateVelocityToTarget(final double minV, final double maxV, final double x, final double y, final double[] target) {
         double v = minV + Math.random() * (maxV - minV);
         double dx = target[0] - x;
         final double dy = target[1] - y;

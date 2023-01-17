@@ -1,48 +1,118 @@
 import lombok.Value;
 
-import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class OutputData {
 
     private final Map<Double, Integer> escapeData;
+    private final Board board;
+    private final FileWriter timesFw;
+    private final FileWriter densityFw;
+    private final FileWriter particlesFw;
+    private final double densityAnalysisY;
 
-    public OutputData() {
+
+    public OutputData(final Board board) throws IOException {
         this.escapeData = new TreeMap<>();
+        this.board = board;
+        this.densityAnalysisY = 0.25*board.getRealHeight();
+        this.timesFw = new FileWriter(String.format("timesN=%d.csv", board.getParticles().size()));
+        this.densityFw = new FileWriter(String.format("density_A=%,.2f.csv", densityAnalysisY*board.getRealWidth()));
+        this.particlesFw = new FileWriter("particles.xyz");
     }
 
     public Map<Double, Integer> getEscapeData() {
         return escapeData;
     }
 
-    public void writeTimesToFile(boolean isFirstWrite) throws IOException {
+    public void writeTimesToFile(final boolean isFirstWrite) throws IOException {
         if(isFirstWrite) {
-            try {
-                Files.delete(Paths.get("times.csv"));
-            } catch (Exception e) {
-
-            }
-        }
-        FileWriter pos = new FileWriter("times.csv", true);
-        BufferedWriter buffer = new BufferedWriter(pos);
-        if(isFirstWrite) {
-            buffer.write("time;escaped_particles");
-            buffer.newLine();
+            timesFw.write("time;escaped_particles");
+            timesFw.write('\n');
         }
 
         for(Map.Entry<Double, Integer> time : escapeData.entrySet()) {
-            buffer.write(time.getKey().toString() + ";" + time.getValue().toString());
-            buffer.newLine();
+            timesFw.write(time.getKey().toString() + ";" + time.getValue().toString());
+            timesFw.write('\n');
         }
-        buffer.flush();
-        buffer.close();
-        pos.close();
+
         escapeData.clear();
+    }
+
+    public void closeFileWriter() throws IOException {
+        timesFw.close();
+        densityFw.close();
+        particlesFw.close();
+    }
+
+    public void writeBoardToFile(List<List<ParticleOutputData>> states) throws IOException {
+        var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
+        for(List<ParticleOutputData> particles : states) {
+            particlesFw.write(String.valueOf(particles.size() + dummyParticlesSize));
+            particlesFw.write('\n');
+            particlesFw.write('\n');
+            writeDummyParticles();
+            for(OutputData.ParticleOutputData p : particles) {
+                particlesFw.write(p.getId() + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius());
+                particlesFw.write('\n');
+            }
+        }
+
+        writeDensityFile(states);
+        states.clear();
+    }
+
+    private void writeDummyParticles() throws IOException {
+        particlesFw.write("201 0 0 0 0 0.0001");
+        particlesFw.write('\n');
+        particlesFw.write("202 "+board.getL()+" 0 0 0 0.0001");
+        particlesFw.write('\n');
+        particlesFw.write("203 0 "+board.getL()+" 0 0 0.0001");
+        particlesFw.write('\n');
+        particlesFw.write("204 "+board.getL()+" "+board.getL()+" 0 0 0.0001");
+        particlesFw.write('\n');
+        particlesFw.write("214 "+Board.getXPadding()+" "+Board.getYPadding()+" 0 0 0.05");
+        particlesFw.write('\n');
+        particlesFw.write("215 "+(board.getL()-Board.getXPadding())+" "+Board.getYPadding()+" 0 0 0.05");
+        particlesFw.write('\n');
+        particlesFw.write("216 "+Board.getXPadding()+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
+        particlesFw.write('\n');
+        particlesFw.write("217 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
+        particlesFw.write('\n');
+
+        for(int i = 0; i < board.getTurnstiles().size(); i++){
+            var t = board.getTurnstiles().get(i);
+            particlesFw.write((-1-4*i)+ " " + t.getX() +" 0 0 0 0.1");
+            particlesFw.write('\n');
+            particlesFw.write((-2-4*i)+ " " + t.getX() +" "+t.getY()+" 0 0 0.1");
+            particlesFw.write('\n');
+            particlesFw.write((-3-4*i)+ " " + (t.getX()+t.getWidth()) +" 0 0 0 0.1");
+            particlesFw.write('\n');
+            particlesFw.write((-4-4*i)+ " " + (t.getX()+t.getWidth()) +" "+t.getY()+" 0 0 0.1");
+            particlesFw.write('\n');
+        }
+    }
+
+    private void writeDensityFile(List<List<ParticleOutputData>> states) throws IOException {
+        var analysisArea = board.getRealWidth() * densityAnalysisY;
+
+        var particlesInRange = states.stream().map(state -> state.stream().map(p -> {
+            if (p.getY() < densityAnalysisY){
+                return 1;
+            }else {
+                return 0;
+            }
+        }).reduce(0, Integer::sum)).collect(Collectors.toList());
+
+        for(int p : particlesInRange){
+            densityFw.write(String.valueOf(p/analysisArea));
+            densityFw.write('\n');
+        }
     }
 
     public static ParticleOutputData particleOutput(final Particle particle) {
