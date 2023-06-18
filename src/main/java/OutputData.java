@@ -1,3 +1,4 @@
+import lombok.Data;
 import lombok.Value;
 
 import java.io.FileWriter;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+@Data
 public class OutputData {
 
     private final Map<Double, Integer> escapeData;
@@ -32,10 +34,6 @@ public class OutputData {
         densityFw.write('\n');
     }
 
-    public Map<Double, Integer> getEscapeData() {
-        return escapeData;
-    }
-
     public void writeTimesToFile() throws IOException {
         for(Map.Entry<Double, Integer> time : escapeData.entrySet()) {
             timesFw.write(time.getKey().toString() + ";" + time.getValue().toString());
@@ -45,7 +43,7 @@ public class OutputData {
         escapeData.clear();
     }
 
-    public void closeFileWriter() throws IOException {
+    public void closeFileWriters() throws IOException {
         timesFw.close();
         densityFw.close();
         particlesFw.close();
@@ -102,18 +100,22 @@ public class OutputData {
     private void writeDensityFile(List<List<ParticleOutputData>> states) throws IOException {
         var analysisArea = board.getRealWidth() * densityAnalysisY;
 
-        var particlesInRange = states.stream().map(state -> state.stream().map(p -> {
+        var particlesInRange = calculateParticlesInRange(states);
+
+        for(int p : particlesInRange){
+            densityFw.write(String.valueOf(p/analysisArea));
+            densityFw.write('\n');
+        }
+    }
+
+    public List<Integer> calculateParticlesInRange(List<List<ParticleOutputData>> states){
+        return states.stream().map(state -> state.stream().map(p -> {
             if (p.getY() < densityAnalysisY){
                 return 1;
             }else {
                 return 0;
             }
         }).reduce(0, Integer::sum)).collect(Collectors.toList());
-
-        for(int p : particlesInRange){
-            densityFw.write(String.valueOf(p/analysisArea));
-            densityFw.write('\n');
-        }
     }
 
     public static ParticleOutputData particleOutput(final Particle particle) {
