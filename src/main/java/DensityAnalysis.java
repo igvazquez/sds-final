@@ -26,7 +26,7 @@ public class DensityAnalysis {
             Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
                     minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 
-            PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
+            PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "distance");
             simulation.simulate(iterations, false);
 
             var analysisArea = simulation.getOutputData().getDensityAnalysisY()*board.getRealWidth();

@@ -1,6 +1,4 @@
 import lombok.Data;
-
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -17,10 +15,12 @@ public class Particle {
     double mass;
     double radius;
     boolean locked;
+    int turnstileTargeted;
     Verlet integrator;
 
     public Particle(int id, double x, double y, double vx, double vy,
                     double vd, double[] target, double mass, double radius) {
+        this.turnstileTargeted = -1;
         this.id = id;
         this.x = x;
         this.y = y;

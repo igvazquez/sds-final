@@ -1,8 +1,4 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 
 public class Main {
 
@@ -16,7 +12,7 @@ public class Main {
 
         var iterations = 100000;
         int n = 160;
-        double d = 1.2;
+        double d = 1.6;
         double l = 30;
         int turnstiles = 5;
         double minR = 0.3;
@@ -31,7 +27,7 @@ public class Main {
         Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
                 minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "distance");
         simulation.simulate(iterations, true);
     }
 }

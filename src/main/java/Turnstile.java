@@ -1,7 +1,11 @@
 import lombok.Data;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Data
 public class Turnstile {
+
 
     // Coordinates indicate the top left of the turnstile
     double x;
@@ -11,6 +15,7 @@ public class Turnstile {
     double length;
     double width; // "Door width"
     boolean locked;
+    List<Particle> targeted;
     Particle particleIn;
 
     public Turnstile(double x, double y, double length, double width, double transactionTime) {
@@ -19,6 +24,7 @@ public class Turnstile {
         this.transactionTime = transactionTime;
         this.length = length;
         this.width = width;
+        this.targeted = new LinkedList<>();
         this.locked = false;
     }
 
