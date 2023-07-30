@@ -36,8 +36,8 @@ public class PedestrianSimulation {
         states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
         CellIndexMethod cim;
 
-        if(!decisionMode.equals("distance"))
-            board.assignParticles();
+        //if(!decisionMode.equals("distance"))
+        //    board.assignParticles();
 
         int i = 0;
         try {
