@@ -11,7 +11,7 @@ public class Main {
 //        var particles = List.of(p1, p2, p3);
 
         var iterations = 100000;
-        int n = 160;
+        int n = 60;
         double d = 1.6;
         double l = 30;
         int turnstiles = 5;
@@ -27,7 +27,7 @@ public class Main {
         Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
                 minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "distance");
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "else");
         simulation.simulate(iterations, true);
     }
 }

@@ -32,7 +32,8 @@ public class PedestrianSimulation {
         this.outputData = new OutputData(board);
     }
 
-    public void simulate(final int maxIter, final boolean logToFile) throws IOException {
+    public boolean simulate(final int maxIter, final boolean logToFile) throws IOException {
+        boolean completed = true;
         List<Particle> currentState = board.getParticles();
         states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));
         CellIndexMethod cim;
@@ -60,6 +61,7 @@ public class PedestrianSimulation {
         } catch (IllegalArgumentException e) {
             System.out.println("exploto en " + i + " a t=" + t);
             System.out.println(e.getMessage());
+            completed = false;
         } finally {
             if (logToFile){
                 outputData.writeBoardToFile(states);
@@ -67,6 +69,7 @@ public class PedestrianSimulation {
                 outputData.closeFileWriters();
             }
         }
+        return completed;
     }
 
     private List<Particle> doStep(final List<Particle> currentState, final CellIndexMethod cim) {
@@ -79,6 +82,8 @@ public class PedestrianSimulation {
 
             if(p.getY() > 0) {
                 nextState.add(p);
+            } else if(!decisionMode.equals("distance")){
+                board.getTurnstiles().get(p.turnstileTargeted).targeted.remove(p);
             }
         }
         outputData.getEscapeData().put(this.t, startParticles - nextState.size());

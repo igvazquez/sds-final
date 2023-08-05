@@ -44,7 +44,7 @@ public class Board {
         this.assignableParticles = new ArrayList<>();
         this.tau = tau;
         this.beta = beta;
-        this.dt = Math.sqrt(60.0 / 120000) / 10;
+        this.dt = 0.0028;//Math.round(Math.sqrt(60.0 / 120000) / 8, 4);
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
@@ -125,13 +125,13 @@ public class Board {
         double[] target;
         List<Particle> toRemove = new ArrayList<>();
         for (Particle p: assignableParticles) {
-            if(p.getY() <= L/2) {
+            if(p.getY() <= L/4) {
                 // area de decision
                 if(mode.equals("distance")) {
                     // molinete mas cercano
                     target = getParticleTarget(getTurnstiles(), L, p.getX());
                 } else {
-                    //dame el mas cercano
+                    //dame el mas desocupado
                     Turnstile free = turnstiles
                             .stream()
                             .min(Comparator.comparing(Turnstile::getTargeted,
@@ -139,6 +139,7 @@ public class Board {
                     //poner target a la particula, asignar particula a molinete
                     free.targeted.add(p);
                     target = new double[]{free.getX() + free.getWidth()/2, Y_PADDING};
+                    p.setTurnstileTargeted(turnstiles.indexOf(free));
                 }
                 vel = calculateVelocityToTarget(p.vx, p.vy, p.getX(), p.getY(), target);
                 p.setTarget(target);
