@@ -21,7 +21,7 @@ public class PedestrianSimulation {
     private final double tau;
     private double t;
 
-    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode) throws IOException {
+    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode, final int simulationNumber) throws IOException {
         this.board = board;
         this.decisionMode = decisionMode;
         this.rc = rc;
@@ -29,7 +29,7 @@ public class PedestrianSimulation {
         this.tau = tau;
         this.t = 0;
         this.startParticles = board.getParticles().size();
-        this.outputData = new OutputData(board);
+        this.outputData = new OutputData(board, simulationNumber);
     }
 
     public boolean simulate(final int maxIter, final boolean logToFile) throws IOException {
@@ -43,10 +43,10 @@ public class PedestrianSimulation {
             while (!currentState.isEmpty() && i < maxIter) {
                 if(i % 5000 == 0) {
                     System.out.println("Iter: " + i + " Particles Left: " + board.getParticles().size());
-                    if (logToFile){
+                    /* if (logToFile){
                         outputData.writeBoardToFile(states);
                         outputData.writeTimesToFile();
-                    }
+                    } */
                 }
                 cim = new CellIndexMethod(board, board.getMaxR(), false);
                 //cim.calculateNeighbours();
@@ -65,10 +65,12 @@ public class PedestrianSimulation {
         } finally {
             if (logToFile){
                 outputData.writeBoardToFile(states);
-                outputData.writeTimesToFile();
-                outputData.closeFileWriters();
+                outputData.getParticlesFw().close();
+                //outputData.writeTimesToFile();
+                //outputData.closeFileWriters();
             }
         }
+        System.out.println("simulacion terminada en " + i + " iteraciones");
         return completed;
     }
 
@@ -87,6 +89,9 @@ public class PedestrianSimulation {
             }
         }
         outputData.getEscapeData().put(this.t, startParticles - nextState.size());
+        outputData.addDensityEntry(this.t, currentState, this.getBoard().getRealWidth());
         return nextState;
     }
+
+
 }

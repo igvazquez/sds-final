@@ -5,7 +5,10 @@ import statistics
 import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 
-simulations = 3
+
+#TODO: ver cuantos decimales usar y como para toda metrica
+
+simulations = 1
 #matplotlib.use('Agg')
 dt = 0.0028
 df = pd.read_csv(f"/home/abossi/IdeaProjects/sds-final/times_sims={simulations}.csv", sep=';')
@@ -33,10 +36,10 @@ for df in dfs:
     df['simulation_0'] = df['simulation_0'].astype(float)
 times = [float(i) for i in times]
 
-t_avg = sum(times) / float(len(times))
-t_std = statistics.stdev(times)
-print(f'TIEMPO PROMEDIO DE SALIDA DE {simulations} SIMULACIONES: {t_avg}')
-print(f'DESVIO DE LOS TIEMPOS: {t_std}')
+#t_avg = sum(times) / float(len(times))
+#t_std = statistics.stdev(times)
+#print(f'TIEMPO PROMEDIO DE SALIDA DE {simulations} SIMULACIONES: {t_avg}')
+#print(f'DESVIO DE LOS TIEMPOS: {t_std}')
 
 min = min([len(x) for x in dfs])
 dfs = [df[0:min] for df in dfs]
@@ -46,7 +49,7 @@ times = []
 for i in range(min_particles):
     times.append(df[df['0'] == i])
 
-mean = [np.mean(t['simulation_0']) for t in times]
+#mean = [np.mean(t['simulation_0']) for t in times]
 std = [np.std(t['simulation_0']) for t in times]
 
 
@@ -61,21 +64,24 @@ for i in range(np_array.shape[1]):
     a = np_array[:, i]
     ns.append(np.sum(a, 0) / len(a))
 
+
+print('hasta aca')
 ns = np.array(ns)
-W = min_particles
-window = sliding_window_view(ns[:, 1], W)
-ret = [(a[-1] - a[0]) / W / dt for a in window]
+#W = min_particles
+#window = sliding_window_view(ns[:, 1], W)
+for i in range(1, len(ns)):
+    Q.append((ns[i-1] - ns[i]) / dt)
 
 fig = plt.figure(figsize=(16, 10))
 ax = fig.add_subplot(1, 1, 1)
-ax.errorbar(mean, range(min_particles) ,xerr=std, capsize=2)
+#ax.errorbar(mean, range(min_particles) ,xerr=std, capsize=2)
 ax.set_xlabel(r'$t$ (s)', size=20)
 ax.set_ylabel(r'n(t)', size=20)
 ax.grid(which="both")
 
 fig = plt.figure(figsize=(16, 10))
 ax = fig.add_subplot(1, 1, 1)
-ax.plot(ns[:, 0][:len(ns)-W+1], ret, 'o')
+ax.plot(times, Q, 'o')
 ax.set_xlabel(r'$t$ (s)', size=20)
 ax.set_ylabel(r'Q(t)', size=20)
 ax.grid(which="both")

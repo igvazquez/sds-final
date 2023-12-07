@@ -12,42 +12,80 @@ import java.util.stream.Collectors;
 public class OutputData {
 
     private final Map<Double, Integer> escapeData;
+    private final Map<Double, Double> densityData;
     private final Board board;
-    private final FileWriter timesFw;
-    private final FileWriter densityFw;
+    //private final FileWriter timesFw;
+    //private final FileWriter densityFw;
     private final FileWriter particlesFw;
     private final double densityAnalysisY;
+    private final int simulation;
 
 
-    public OutputData(final Board board) throws IOException {
+    public OutputData(final Board board, final int simulationNumber) throws IOException {
+        this.simulation = simulationNumber;
         this.escapeData = new TreeMap<>();
+        this.densityData = new TreeMap<>();
         this.board = board;
         this.densityAnalysisY = 0.25*board.getRealHeight();
-        this.timesFw = new FileWriter(String.format("timesN=%d.csv", board.getParticles().size()));
-        this.densityFw = new FileWriter(String.format("density_A=%,.2f.csv", densityAnalysisY*board.getRealWidth()));
+        //this.timesFw = new FileWriter(String.format("timesN=%d.csv", board.getParticles().size()));
+        //this.densityFw = new FileWriter(String.format("density_A=%,.2f.csv", densityAnalysisY*board.getRealWidth()));
         this.particlesFw = new FileWriter("particles.xyz");
 
-        timesFw.write("time;escaped_particles");
-        timesFw.write('\n');
+        //timesFw.write("time;escaped_particles;simulation");
+        //timesFw.write('\n');
 
-        densityFw.write("density");
-        densityFw.write('\n');
+        //densityFw.write("density");
+        //densityFw.write('\n');
     }
 
-    public void writeTimesToFile() throws IOException {
+    /*public void writeTimesToFile() throws IOException {
         for(Map.Entry<Double, Integer> time : escapeData.entrySet()) {
-            timesFw.write(time.getKey().toString() + ";" + time.getValue().toString());
+            timesFw.write(time.getKey().toString() + ";" + time.getValue().toString() + ";" + simulation);
             timesFw.write('\n');
         }
 
         escapeData.clear();
+    } */
+
+    public static void writeSimulation(PedestrianSimulation simulation) throws IOException {
+        OutputData data = simulation.getOutputData();
+        var analysisArea = data.getDensityAnalysisY() * simulation.getBoard().getRealWidth();
+
+        var densityFw = new FileWriter(String.format("density_sim=%d_A=%,.2f.csv",
+                data.simulation, analysisArea), true);
+
+        var timesFw = new FileWriter(String.format("times_sim=%d.csv", data.simulation), true);
+
+        densityFw.write("time;density\n");
+
+        timesFw.write("time;escaped\n");
+
+        System.out.println("escribiendo densidades simulacion " + data.simulation);
+        for(Map.Entry<Double, Double> density : data.getDensityData().entrySet()){
+            densityFw.write(density.getKey().toString() + ";" + density.getValue().toString());
+            densityFw.write('\n');
+        }
+
+        densityFw.close();
+        System.out.println("densidades listas");
+
+        System.out.println("escribiendo tiempos simulacion " + data.simulation);
+        for(Map.Entry<Double, Integer> time : data.getEscapeData().entrySet()) {
+            timesFw.write(time.getKey().toString() + ";" + time.getValue().toString());
+            timesFw.write('\n');
+        }
+        System.out.println("tiempos listos");
+
+        timesFw.close();
+
+        System.out.println("escritura simulacion " + data.simulation + " terminada");
     }
 
-    public void closeFileWriters() throws IOException {
+    /* public void closeFileWriters() throws IOException {
         timesFw.close();
         densityFw.close();
         particlesFw.close();
-    }
+    } */
 
     public void writeBoardToFile(List<List<ParticleOutputData>> states) throws IOException {
         var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
@@ -62,7 +100,7 @@ public class OutputData {
             }
         }
 
-        writeDensityFile(states);
+        //writeDensityFile(states);
         states.clear();
     }
 
@@ -97,7 +135,7 @@ public class OutputData {
         }
     }
 
-    private void writeDensityFile(List<List<ParticleOutputData>> states) throws IOException {
+    /*private void writeDensityFile(List<List<ParticleOutputData>> states) throws IOException {
         var analysisArea = board.getRealWidth() * densityAnalysisY;
 
         var particlesInRange = calculateParticlesInRange(states);
@@ -106,6 +144,21 @@ public class OutputData {
             densityFw.write(String.valueOf(p/analysisArea));
             densityFw.write('\n');
         }
+    } */
+
+    public void addDensityEntry(double t, List<Particle> currentState, double width) {
+        double analysisArea = densityAnalysisY * width;
+        densityData.put(t, getParticlesInRange(currentState) / analysisArea);
+    }
+
+    private int getParticlesInRange(List<Particle> state) {
+        return state.stream().map(p -> {
+            if (p.getY() < densityAnalysisY){
+                return 1;
+            }else {
+                return 0;
+            }
+        }).reduce(0, Integer::sum);
     }
 
     public List<Integer> calculateParticlesInRange(List<List<ParticleOutputData>> states){
