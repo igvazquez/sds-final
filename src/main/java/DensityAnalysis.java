@@ -4,20 +4,20 @@ public class DensityAnalysis {
 
     public static void main(String[] args) throws IOException {
 
-        var simulations = 1;
+        var simulations = 3;
         var iterations = 150000;
-        int n = 50;
+        int n = 150;
         double d = 1.2;
-        double l = 30;
+        double l = 50;
         int turnstiles = 5;
         double minR = 0.3;
         double maxR = 0.58;
-        double m = 50;
-        double minV = 0.5;
-        double maxV = 0.7;
+        double m = 70;
+        double minV = 1.0;
+        double maxV = 1.0;
         double tau = 0;
         double beta = 0;
-        double transactionTime = 2;
+        double transactionTime = 2.0;
 
         boolean completed;
         int broken = 0;

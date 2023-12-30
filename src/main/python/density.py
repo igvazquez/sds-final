@@ -1,24 +1,13 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+from src.main.python.functions import plot_time_series, get_density_simulations, time_series_mean
 
-df = pd.read_csv("density_sims=2_A=130.00.csv")
-simulations = 2
+simulations = 3
+dt = 0.0028
 
-dfs = []
+dfs = get_density_simulations(simulations=simulations)
 
-idx = 0
-for i in range(simulations-1):
-    sim = 'simulation_' + str(i+1)
-    start = idx
-    idx = df[df['simulation_0'] == sim].index.to_list()[0]
-    dfs.append(df[start:idx])
+d_t = time_series_mean(series=dfs, value_col='density')
+#sim0 = dfs[0]
+#t = sim0['time']
 
-dfs.append(df[idx:])
+plot_time_series(t=d_t['time'], y=d_t['density'], x_label=r'$t$ (s)', y_label=r'Densidad: d(t)')
 
-
-for data in dfs:
-    x = list(range(data.size))
-    plt.scatter(x, data)
-    plt.title('Density')
-
-plt.show()

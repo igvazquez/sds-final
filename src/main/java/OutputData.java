@@ -27,15 +27,9 @@ public class OutputData {
         this.densityData = new TreeMap<>();
         this.board = board;
         this.densityAnalysisY = 0.25*board.getRealHeight();
-        //this.timesFw = new FileWriter(String.format("timesN=%d.csv", board.getParticles().size()));
-        //this.densityFw = new FileWriter(String.format("density_A=%,.2f.csv", densityAnalysisY*board.getRealWidth()));
         this.particlesFw = new FileWriter("particles.xyz");
 
-        //timesFw.write("time;escaped_particles;simulation");
-        //timesFw.write('\n');
 
-        //densityFw.write("density");
-        //densityFw.write('\n');
     }
 
     /*public void writeTimesToFile() throws IOException {
