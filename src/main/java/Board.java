@@ -120,12 +120,12 @@ public class Board {
         return false;
     }
 
-    public void assignTurnstiles(String mode) {
+    public void assignTurnstiles(String mode, double decisionPoint) {
         double[] vel;
         double[] target;
         List<Particle> toRemove = new ArrayList<>();
         for (Particle p: assignableParticles) {
-            if(p.getY() <= L/4) {
+            if(p.getY() <= decisionPoint) {
                 // area de decision
                 if(mode.equals("distance")) {
                     // molinete mas cercano

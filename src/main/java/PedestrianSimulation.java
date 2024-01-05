@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 @Data
 public class PedestrianSimulation {
-
     private List<List<OutputData.ParticleOutputData>> states = new LinkedList<>();
     private OutputData outputData;
     private final Board board;
@@ -20,8 +19,9 @@ public class PedestrianSimulation {
     private final double beta;
     private final double tau;
     private double t;
+    private final double decisionPoint;
 
-    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode, final int simulationNumber) throws IOException {
+    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode, final int simulationNumber, final double decisionPoint) throws IOException {
         this.board = board;
         this.decisionMode = decisionMode;
         this.rc = rc;
@@ -30,6 +30,7 @@ public class PedestrianSimulation {
         this.t = 0;
         this.startParticles = board.getParticles().size();
         this.outputData = new OutputData(board, simulationNumber);
+        this.decisionPoint = decisionPoint;
     }
 
     public boolean simulate(final int maxIter, final boolean logToFile) throws IOException {
@@ -52,7 +53,7 @@ public class PedestrianSimulation {
                 //cim.calculateNeighbours();
                 cim.calculateNeighborsBrute();
                 currentState = doStep(currentState, cim);
-                board.assignTurnstiles(decisionMode);
+                board.assignTurnstiles(decisionMode, decisionPoint);
                 board.updateTurnstiles(t);
                 board.updateParticles(currentState);
                 states.add(currentState.stream().map(OutputData::particleOutput).collect(Collectors.toList()));

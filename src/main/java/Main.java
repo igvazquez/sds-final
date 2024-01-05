@@ -27,7 +27,7 @@ public class Main {
         Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
                 minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "else", 1);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "else", 1, l/4);
         simulation.simulate(iterations, true);
     }
 }

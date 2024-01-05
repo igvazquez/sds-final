@@ -4,7 +4,7 @@ public class DensityAnalysis {
 
     public static void main(String[] args) throws IOException {
 
-        var simulations = 3;
+        var simulations = 5;
         var iterations = 150000;
         int n = 150;
         double d = 1.2;
@@ -17,7 +17,8 @@ public class DensityAnalysis {
         double maxV = 1.0;
         double tau = 0;
         double beta = 0;
-        double transactionTime = 2.0;
+        double transactionTime = 6.0;
+        double decisionPoint = 0.9*l;
 
         boolean completed;
         int broken = 0;
@@ -28,7 +29,7 @@ public class DensityAnalysis {
             Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
                     minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
 
-            PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "else", i+1);
+            PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "distance", i+1, decisionPoint);
             completed = simulation.simulate(iterations, true);
 
             if(completed) {
