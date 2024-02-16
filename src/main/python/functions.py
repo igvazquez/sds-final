@@ -49,7 +49,7 @@ def get_density_simulations(route_path: str, simulations: int) -> List[pd.DataFr
 
 
 def plot_time_series(t: pd.Series, y: pd.Series, std_error: pd.Series, x_label: str, y_label: str, filename: str) -> None:
-    fig = plt.figure(figsize=(30, 10))
+    fig = plt.figure(figsize=(30, 30))
     ax = fig.add_subplot(1, 1, 1)
     ax.plot(t, y, '-')
     ax.fill_between(t, y - std_error, y + std_error, alpha=0.2)
@@ -57,7 +57,7 @@ def plot_time_series(t: pd.Series, y: pd.Series, std_error: pd.Series, x_label: 
     ax.set_ylabel(y_label, size=20)
     ax.grid(which="both")
     ax.tick_params(axis='both', which='major', labelsize=15)  # Increase axis values size
-    plt.xticks(np.arange(min(t), max(t)+1, 50))  # Add ticks every 50 seconds
+    plt.xticks(np.arange(min(t), max(t)+1, 10))  # Add ticks every 10 seconds
     plt.tight_layout(pad=1.5)  # Adjust padding
     plt.savefig(f'{filename}.png')
 
@@ -74,11 +74,32 @@ def plot_multiple_time_series(data_list: List[Tuple[pd.Series, pd.Series, pd.Ser
     ax.set_ylabel(y_label, size=20)
     ax.grid(which="both")
     ax.tick_params(axis='both', which='major', labelsize=15)  # Increase axis values size
-    plt.xticks(np.arange(min(t), max(t)+1, 50))  # Add ticks every 50 seconds
+    plt.xticks(np.arange(min(t), max(t)+1, 10))  # Add ticks every 10 seconds
     plt.tight_layout(pad=1.5)  # Adjust padding
-    ax.legend()  # Add a legend
+    ax.legend(fontsize=16, loc="upper right")  # Add a legend
     plt.savefig(f'{filename}.png')
 
+def plot_escape_time(series_list: List[Tuple[float, float, str]], filename: str, xlabel: str, ylabel: str) -> None:
+    fig = plt.figure()
+    for value, std, label in series_list:
+        plt.errorbar(label, value, yerr=std, fmt='o')
+    fig.axes[0].set_xlabel(xlabel)
+    fig.axes[0].set_ylabel(ylabel)
+    fig.axes[0].grid(axis="y")
+    fig.axes[0].set_ylim([0, 120])
+    plt.savefig(f'{filename}.png')
+
+def plot_means(series_list: List[Tuple[pd.Series, pd.Series, pd.Series, str]], filename: str, xlabel: str, ylabel: str) -> None:
+    fig = plt.figure()
+    for _, series, _, label in series_list:
+        mean = series.mean()
+        std = series.std()
+        plt.errorbar(label, mean, yerr=std, fmt='o')
+    fig.axes[0].set_xlabel(xlabel)
+    fig.axes[0].set_ylabel(ylabel)
+    fig.axes[0].grid(axis="y")
+    plt.yticks(np.arange(0,7,0.5))
+    plt.savefig(f'{filename}.png')
 
 def calculate_average_exit_time(series: List[pd.DataFrame]) -> Tuple[float, float]:
     # Calculate exit times
