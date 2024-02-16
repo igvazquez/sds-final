@@ -30,3 +30,4 @@ target/
 # Output files
 *.xyz
 *.csv
+output/*
