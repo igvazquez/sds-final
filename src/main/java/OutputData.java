@@ -41,14 +41,13 @@ public class OutputData {
         escapeData.clear();
     } */
 
-    public static void writeSimulation(PedestrianSimulation simulation) throws IOException {
+    public static void writeSimulation(PedestrianSimulation simulation, String path) throws IOException {
         OutputData data = simulation.getOutputData();
         var analysisArea = data.getDensityAnalysisY() * simulation.getBoard().getRealWidth();
 
-        var densityFw = new FileWriter(String.format("density_sim=%d_A=%,.2f.csv",
+        var densityFw = new FileWriter(String.format(path+"decision_"+simulation.getDecisionMode()+"/density_sim=%d_A=%,.2f.csv",
                 data.simulation, analysisArea), true);
-
-        var timesFw = new FileWriter(String.format("times_sim=%d.csv", data.simulation), true);
+        var timesFw = new FileWriter(String.format(path+"decision_"+simulation.getDecisionMode()+"/times_sim=%d.csv", data.simulation), true);
 
         densityFw.write("time;density\n");
 

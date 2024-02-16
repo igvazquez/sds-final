@@ -16,17 +16,13 @@ public class PedestrianSimulation {
     private final int startParticles;
     private final String decisionMode;
     private final double rc;
-    private final double beta;
-    private final double tau;
     private double t;
     private final double decisionPoint;
 
-    public PedestrianSimulation(final Board board, final double rc, final double beta, final double tau, final String decisionMode, final int simulationNumber, final double decisionPoint) throws IOException {
+    public PedestrianSimulation(final Board board, final double rc, final String decisionMode, final int simulationNumber, final double decisionPoint) throws IOException {
         this.board = board;
         this.decisionMode = decisionMode;
         this.rc = rc;
-        this.beta = beta;
-        this.tau = tau;
         this.t = 0;
         this.startParticles = board.getParticles().size();
         this.outputData = new OutputData(board, simulationNumber);

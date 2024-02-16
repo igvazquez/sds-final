@@ -18,8 +18,6 @@ public class Board {
     private final double minV;
     private final double maxV;
     private final double Ve;
-    private final double tau;
-    private final double beta;
     private final double dt;
     private final double doorWidth;
     private final List<Turnstile> turnstiles;
@@ -31,8 +29,8 @@ public class Board {
     private SFM sfm;
 
     public Board(double l, double d, int turnstiles, double transactionTime,
-                 double minR, double maxR, double minV, double maxV, double tau,
-                 double beta, double Ve, int m, List<Particle> particles) {
+                 double minR, double maxR, double minV, double maxV,
+                 double Ve, int m, List<Particle> particles) {
         L = l;
         this.minR = minR;
         this.maxR = maxR;
@@ -42,8 +40,6 @@ public class Board {
         this.doorWidth = d;
         this.turnstiles = new ArrayList<>(turnstiles);
         this.assignableParticles = new ArrayList<>();
-        this.tau = tau;
-        this.beta = beta;
         this.dt = 0.0028;//Math.round(Math.sqrt(60.0 / 120000) / 8, 4);
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
@@ -153,13 +149,13 @@ public class Board {
 
     public static Board getRandomBoard(int n, double d, int turnstiles, double transactionTime, double l,
                                        int m, double minR, double maxR, double minV, double maxV, double vd,
-                                       double tau, double beta, double ve,double maxMass) {
+                                       double ve,double maxMass) {
 
         List<Particle> particles = new ArrayList<>();
 
         double x, y, radius;
         double[] vel;
-        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, minV, maxV, tau, beta, ve, m, new ArrayList<>());
+        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, minV, maxV, ve, m, new ArrayList<>());
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
         board.setSfm(sfm);
 

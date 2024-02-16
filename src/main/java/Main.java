@@ -20,14 +20,12 @@ public class Main {
         double m = 60;
         double minV = 0.5;
         double maxV = 0.7;
-        double tau = 0;
-        double beta = 0;
         double transactionTime = 2;
 
         Board board = Board.getRandomBoard(n, d, turnstiles, transactionTime, l, Board.optM(l, maxR),
-                minR, maxR, minV, maxV, maxV, tau, beta, maxV, m);
+                minR, maxR, minV, maxV, maxV, maxV, m);
 
-        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, beta, tau, "else", 1, l/4);
+        PedestrianSimulation simulation = new PedestrianSimulation(board, maxR, "else", 1, l/4);
         simulation.simulate(iterations, true);
     }
 }
