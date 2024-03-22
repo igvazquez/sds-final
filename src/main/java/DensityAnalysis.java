@@ -36,6 +36,7 @@ public class DensityAnalysis {
             } else {
                 broken++;
                 i--;
+                break;
             }
 
         }

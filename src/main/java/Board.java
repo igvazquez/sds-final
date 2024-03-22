@@ -81,6 +81,34 @@ public class Board {
         return L;
     }
 
+    public boolean isBetweenTurnstiles(Particle p, Turnstile t1, Turnstile t2) {
+        //ASUME QUE T1 ESTA ANTES QUE T2
+        return p.getX() > t1.x + t1.width && p.getX() < t2.x;
+    }
+
+    public boolean collidesLeftWall(final Particle p) {
+        return p.getX() - p.getRadius() <= 0 + getXPadding();
+    }
+
+    public boolean collidesRightWall(final Particle p) {
+        return p.getX() + p.getRadius() >= getL() - getXPadding();
+    }
+
+    public boolean collidesUpperWall(final Particle p) {
+        return p.getY() + p.getRadius() >= getL() - getYPadding();
+    }
+    public boolean isInLowArea(final Particle p) {
+        //centro por arriba de linea de zona baja y borde por debajo de linea zona baja
+        //o centro por abajo de linea de zona baja y borde por arriba
+        return (p.getY() <= getYPadding() && p.getY() + p.getRadius() >= getYPadding()) ||
+                (p.getY() > getYPadding() && p.getY() - p.getRadius() <= getYPadding());
+    }
+
+    public boolean isWithinTurnstile(Particle p, Turnstile t) {
+        //Solo mira por coord x
+        return p.getX() > t.x && p.getX() < t.x + t.width;
+    }
+
     public void sortBoard(List<Particle> newParticles) {
         for (int i = 0; i < M * M; i++) {
             cells.put(i, new ArrayList<>());

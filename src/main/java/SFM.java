@@ -55,96 +55,90 @@ public class SFM {
         return Math.abs(magnitudeInsideWall) > 0.001 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.0001 : magnitudeInsideWall;
     }
 
+    private double calculateOverlap(Particle p, Particle other) {
+        return Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()) > p.getRadius() + other.getRadius()
+                ? 0 : wallCheat(p.getRadius() + other.getRadius() - Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()));
+    }
+
     private double[] calculateWallForce(final Particle p, final double time) {
-        double d, g = 0;
+        double g = 0;
         double[] niw = new double[2];
         double[] tiw = new double[2];
         Particle wall = new Particle(-1, 0, 0, 0.0, 0.0,
                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
 
-        if (p.getX() - p.getRadius() <= 0 + Board.getXPadding()) {
-            // WALL TO THE LEFT
-            g = Math.abs(p.getX() - Board.getXPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(Board.getXPadding() - p.getX()));
+        if (board.collidesLeftWall(p)) {
             wall = new Particle(-1, Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if (p.getX() + p.getRadius() >= board.getL() - Board.getXPadding()) {
-            // WALL TO THE RIGHT
-            g = Math.abs(board.getL() - Board.getXPadding() - p.getX()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(board.getL() - Board.getXPadding() - p.getX()));
+        } else if (board.collidesRightWall(p)) {
             wall = new Particle(-1, board.getL() - Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if (p.getY() + p.getRadius() >= board.getL() - Board.getYPadding()) {
-            // WALL ABOVE
-            g = Math.abs((board.getL() - Board.getYPadding()) - p.getY()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(board.getL() - Board.getYPadding() - p.getY()));
+        } else if (board.collidesUpperWall(p)) {
             wall = new Particle(-1, p.getX(), board.getL() - Board.getYPadding(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
             niw = p.getNij(wall);
             tiw = p.getTangentVector(wall);
-        } else if ((p.getY() <= Board.getYPadding() && p.getY() + p.getRadius() >= Board.getYPadding()) || (p.getY() > Board.getYPadding() && p.getY() - p.getRadius() <= Board.getYPadding())) {
-            // TODO: Fix condition that locates turnstiles
+        } else if (board.isInLowArea(p)) {
             // If it's not in front of a turnstile
             var t = board.getTurnstiles().size();
             var turnstilePadding = (board.getL() - 2*Board.X_PADDING - t*board.getDoorWidth())/(t+1);
             boolean bounce = false;
-            for (int i = 0; i < t && !bounce; i++) {
-                var turnstile = board.getTurnstiles().get(i);
-                if(p.getX() - Board.X_PADDING > i*turnstilePadding + i*board.getDoorWidth()
-                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + i*board.getDoorWidth()){
-                    // WALL BELOW
-                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
+
+            for (int i = 0; i <= t && !bounce; i++) {
+                //estos 2 son para muros entre molinetes
+                Turnstile left = i != 0 ? board.getTurnstiles().get(i-1) :
+                        new Turnstile(Board.X_PADDING + (-1+1)*turnstilePadding + -1*board.getDoorWidth(),
+                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                Turnstile right = i != t ? board.getTurnstiles().get(i) :
+                        new Turnstile(Board.X_PADDING + (i+1)*turnstilePadding + i*board.getDoorWidth(),
+                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                //este es para evaluar si dentro del area molinete
+                Turnstile current = i != t ? right : left;
+
+                if(board.isBetweenTurnstiles(p, left, right)) {
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p, wall);
                     niw = p.getNij(wall);
                     tiw = p.getTangentVector(wall);
                     bounce = true;
-                    // If it bounces against the walls of the turnstile
-                } else if(p.getX() - Board.X_PADDING > (i+1)*turnstilePadding + i*board.getDoorWidth()
-                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + (i+1)*board.getDoorWidth()
-                        && !turnstile.isLocked()){
-                    if (p.getX() - p.getRadius() - Board.X_PADDING <= (i+1)*turnstilePadding + i*board.getDoorWidth()){
-                        // Left corner of turnstile
-                        wall = new Particle(-1, (i+1)*turnstilePadding + i*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
-                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
-                        g = 0;
-                        if(p.collides(wall))
-                            g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));
-                        niw = p.getNij(wall);
-                        tiw = p.getTangentVector(wall);
-                    } else if (p.getX() + p.getRadius() - Board.X_PADDING >= (i+1)*turnstilePadding + (i+1)*board.getDoorWidth()){
-                        // Right corner of turnstile
-                        wall = new Particle(-1, (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() + Board.X_PADDING, Board.getYPadding(), 0.0, 0.0,
-                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
-                        g = 0;
-                        if(p.collides(wall))
-                            g = wallCheat(p.getRadius() - p.centerDistanceTo(wall));
-                        niw = p.getNij(wall);
-                        tiw = p.getTangentVector(wall);
-                    }else{
-                        // Entering turnstile
-                        turnstile.lockTurnstile(p, time);
-                    }
-                } else if(p.getX() - Board.X_PADDING > (i+1)*turnstilePadding + i*board.getDoorWidth()
-                        && p.getX() - Board.X_PADDING < (i+1)*turnstilePadding + (i+1)*board.getDoorWidth() && turnstile.isLocked()){
-                    // Locked Turnstile BELOW
-                    g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
+                } else if(board.isWithinTurnstile(p, current) && current.isLocked()) {
+                    //tiene que rebotar como si fuera la pared porque esta siendo usado
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p,wall);
                     niw = p.getNij(wall);
                     tiw = p.getTangentVector(wall);
+                    bounce = true;
+                } else if(board.isWithinTurnstile(p, current) && !current.isLocked()) {
+                    //puede chocar con las puntas o entrar
+                    if(p.getX() - p.getRadius() <= current.x) {
+                        //punta izquierda
+                        wall = new Particle(-1, current.x, current.y, 0.0, 0.0,
+                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+                        g = calculateOverlap(p, wall);
+                        niw = p.getNij(wall);
+                        tiw = p.getTangentVector(wall);
+                    } else if(p.getX() + p.getRadius() >= current.x + current.width) {
+                        //punta derecha
+                        wall = new Particle(-1,current.x + current.width, current.y, 0.0, 0.0,
+                                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+                        g = calculateOverlap(p, wall);
+                        niw = p.getNij(wall);
+                        tiw = p.getTangentVector(wall);
+                    } else {
+                        // Entering turnstile
+                        current.lockTurnstile(p, time);
+                    }
                     bounce = true;
                 }
-            }
-
-            if (p.getX() - Board.X_PADDING > t*turnstilePadding + t*board.getDoorWidth()){
-                g = Math.abs(p.getY() - Board.getYPadding()) > p.getRadius() ? 0 : wallCheat(p.getRadius() - Math.abs(p.getY() - Board.getYPadding()));
-                wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
-                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
-                niw = p.getNij(wall);
-                tiw = p.getTangentVector(wall);
-                bounce = true;
             }
         }
         var prod = p.getVx() * tiw[0] + p.getVy() * tiw[1];
@@ -166,8 +160,9 @@ public class SFM {
         var nij = p.getNij(other);
         var tij = p.getTangentVector(other);
         var dvt = (other.getVx() - p.getVx()) * tij[0] + (other.getVy() - p.getVy()) * tij[1];
-        var g = p.centerDistanceTo(other) > p.getRadius() + other.getRadius() ?
-                0 : p.getRadius() + other.getRadius() - p.centerDistanceTo(other);
+        var g = calculateOverlap(p, other);
+                /* p.centerDistanceTo(other) > p.getRadius() + other.getRadius() ?
+                0 : p.getRadius() + other.getRadius() - p.centerDistanceTo(other);*/
 
         double[] fn = {kn * g * nij[0], kn * g * nij[1]};
         double[] ft = {kt * g * dvt * tij[0], kt * g * dvt * tij[1]};
