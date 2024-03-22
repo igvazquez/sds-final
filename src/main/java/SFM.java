@@ -62,8 +62,8 @@ public class SFM {
 
     private double[] calculateWallForce(final Particle p, final double time) {
         double g = 0;
-        double[] niw = new double[2];
-        double[] tiw = new double[2];
+        double[] niw;
+        double[] tiw;
         Particle wall = new Particle(-1, 0, 0, 0.0, 0.0,
                 0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
 
@@ -71,20 +71,14 @@ public class SFM {
             wall = new Particle(-1, Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             g = calculateOverlap(p, wall);
-            niw = p.getNij(wall);
-            tiw = p.getTangentVector(wall);
         } else if (board.collidesRightWall(p)) {
             wall = new Particle(-1, board.getL() - Board.getXPadding(), p.getY(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             g = calculateOverlap(p, wall);
-            niw = p.getNij(wall);
-            tiw = p.getTangentVector(wall);
         } else if (board.collidesUpperWall(p)) {
             wall = new Particle(-1, p.getX(), board.getL() - Board.getYPadding(), 0.0, 0.0,
                     0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
             g = calculateOverlap(p, wall);
-            niw = p.getNij(wall);
-            tiw = p.getTangentVector(wall);
         } else if (board.isInLowArea(p)) {
             // If it's not in front of a turnstile
             var t = board.getTurnstiles().size();
@@ -106,16 +100,12 @@ public class SFM {
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     g = calculateOverlap(p, wall);
-                    niw = p.getNij(wall);
-                    tiw = p.getTangentVector(wall);
                     bounce = true;
                 } else if(board.isWithinTurnstile(p, current) && current.isLocked()) {
                     //tiene que rebotar como si fuera la pared porque esta siendo usado
                     wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     g = calculateOverlap(p,wall);
-                    niw = p.getNij(wall);
-                    tiw = p.getTangentVector(wall);
                     bounce = true;
                 } else if(board.isWithinTurnstile(p, current) && !current.isLocked()) {
                     //puede chocar con las puntas o entrar
@@ -124,15 +114,11 @@ public class SFM {
                         wall = new Particle(-1, current.x, current.y, 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
                         g = calculateOverlap(p, wall);
-                        niw = p.getNij(wall);
-                        tiw = p.getTangentVector(wall);
                     } else if(p.getX() + p.getRadius() >= current.x + current.width) {
                         //punta derecha
                         wall = new Particle(-1,current.x + current.width, current.y, 0.0, 0.0,
                                 0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
                         g = calculateOverlap(p, wall);
-                        niw = p.getNij(wall);
-                        tiw = p.getTangentVector(wall);
                     } else {
                         // Entering turnstile
                         current.lockTurnstile(p, time);
@@ -141,6 +127,9 @@ public class SFM {
                 }
             }
         }
+        niw = p.getNij(wall);
+        tiw = p.getTangentVector(wall);
+
         var prod = p.getVx() * tiw[0] + p.getVy() * tiw[1];
         var exp = A * Math.exp((p.getRadius() - p.centerDistanceTo(wall)) / B);
 
