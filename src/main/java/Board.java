@@ -11,6 +11,7 @@ public class Board {
     public static final double TARGET_TRIM = 0.2;
     public static final double X_PADDING = 5.0;
     public static final double Y_PADDING = 2.0;
+    public static final double DOOR_CORNER_R = 0.04;
 
     private final double L;
     private final double minR;
@@ -85,6 +86,7 @@ public class Board {
 
     public boolean isBetweenTurnstiles(Particle p, Turnstile t1, Turnstile t2) {
         //ASUME QUE T1 ESTA ANTES QUE T2
+        //ASUME QUE YA ESTA EN ZONA BAJA, NO CHEQUEA Y
         return p.getX() > t1.x + t1.width && p.getX() < t2.x;
     }
 
@@ -92,8 +94,20 @@ public class Board {
         return p.getX() - p.getRadius() <= 0 + getXPadding();
     }
 
+    public boolean collidesLeftSeparatorWall(final Particle p, final Turnstile t) {
+        return p.getX() - p.getRadius() <= t.x;
+    }
+
+    public boolean collidesRightSeparatorWall(final Particle p, final Turnstile t) {
+        return p.getX() + p.getRadius() >= t.x + t.width;
+    }
+
     public boolean collidesRightWall(final Particle p) {
         return p.getX() + p.getRadius() >= getL() - getXPadding();
+    }
+
+    public boolean isInTurnstileDoor(final Particle p) {
+        return p.getY() - p.getRadius() <= getYPadding();
     }
 
     public boolean collidesUpperWall(final Particle p) {
@@ -102,14 +116,22 @@ public class Board {
     public boolean isInLowArea(final Particle p) {
         //centro por arriba de linea de zona baja y borde por debajo de linea zona baja
         //o centro por abajo de linea de zona baja y borde por arriba
-        return (p.getY() <= getYPadding() && p.getY() + p.getRadius() >= getYPadding()) ||
-                (p.getY() > getYPadding() && p.getY() - p.getRadius() <= getYPadding());
+        /*return (p.getY() <= getYPadding() && p.getY() + p.getRadius() >= getYPadding()) ||
+                (p.getY() > getYPadding() && p.getY() - p.getRadius() <= getYPadding());*/
+
+        return (p.getY() <= getYPadding() && p.getY() + p.getRadius() >= getYPadding() - 4 * Board.DOOR_CORNER_R) ||
+                (p.getY() > getYPadding() && p.getY() - p.getRadius() <= getYPadding() + 4 * Board.DOOR_CORNER_R);
+    }
+
+    public boolean isInSeparatorArea(final Particle p) {
+        return p.getY() - p.getRadius() <= getYPadding() + queueLength + 2 * Board.DOOR_CORNER_R;
     }
 
     public boolean isWithinTurnstile(Particle p, Turnstile t) {
         //Solo mira por coord x
         return p.getX() > t.x && p.getX() < t.x + t.width;
     }
+
 
     public void sortBoard(List<Particle> newParticles) {
         for (int i = 0; i < M * M; i++) {
@@ -193,7 +215,7 @@ public class Board {
         for (i = 0; i < n; i++) {
             do {
                 x = X_PADDING + Math.random() * (l-2*X_PADDING);
-                y = Y_PADDING + Math.random() * (l-2*Y_PADDING);
+                y = Y_PADDING + queueLength + Math.random() * (l-2*Y_PADDING);
                 radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 

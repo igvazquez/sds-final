@@ -44,6 +44,8 @@ public class OutputData {
     } */
 
     public static void writeSimulation(PedestrianSimulation simulation, String path) throws IOException {
+        System.out.println("escribiendo simulacion");
+
         OutputData data = simulation.getOutputData();
         var analysisArea = data.getDensityAnalysisY() * simulation.getBoard().getRealWidth();
 
@@ -137,7 +139,7 @@ public class OutputData {
 
             double j = 0;
             while (j <= board.getQueueLength()) {
-                System.out.println("queue wall i: "+i+" j: "+j);
+                //System.out.println("queue wall i: "+i+" j: "+j);
                 int k = (int) (j*10);
                 particlesFw.write((-10000-2^i*3^k)+ " " + t.getX() +" "+(t.getY()+j)+" 0 0 0.1 255 255 255");
                 particlesFw.write('\n');

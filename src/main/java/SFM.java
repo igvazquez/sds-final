@@ -29,7 +29,7 @@ public class SFM {
         Fd = calculateDesireForce(p);
 
         if(!p.isLocked()){
-            var wallFg = calculateWallForce(p, time);
+            var wallFg = calculateWallForce2(p, time);
             Fg[0] += wallFg[0];
             Fg[1] += wallFg[1];
 
@@ -58,6 +58,118 @@ public class SFM {
     private double calculateOverlap(Particle p, Particle other) {
         return Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()) > p.getRadius() + other.getRadius()
                 ? 0 : wallCheat(p.getRadius() + other.getRadius() - Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()));
+    }
+
+    private double[] calculateWallForce2(final Particle p, final double time) {
+        double g = 0;
+        double[] niw;
+        double[] tiw;
+        Particle wall = new Particle(-1, 0, 0, 0.0, 0.0,
+                0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+        if(board.isInSeparatorArea(p)) {
+            // If it's not in front of a turnstile
+            var t = board.getTurnstiles().size();
+            var turnstilePadding = (board.getL() - 2*Board.X_PADDING - t*board.getDoorWidth())/(t+1);
+            boolean bounce = false;
+
+            for (int i = 0; i <= t && !bounce; i++) {
+                //estos 2 son para muros entre molinetes
+                Turnstile left = i != 0 ? board.getTurnstiles().get(i - 1) :
+                        new Turnstile(Board.X_PADDING + (-1 + 1) * turnstilePadding + -1 * board.getDoorWidth(),
+                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                Turnstile right = i != t ? board.getTurnstiles().get(i) :
+                        new Turnstile(Board.X_PADDING + (i + 1) * turnstilePadding + i * board.getDoorWidth(),
+                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                //este es para evaluar si dentro del area molinete
+                Turnstile current = i != t ? right : left;
+
+                //choque con puntas de current
+                //punta izquierda
+                wall = new Particle(-1, current.x, current.y + board.getQueueLength(), 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+                g = calculateOverlap(p, wall);
+                if(g != 0) {
+                    break;
+                }
+
+                //punta derecha
+                wall = new Particle(-1,current.x + current.width, current.y + board.getQueueLength(), 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+                g = calculateOverlap(p, wall);
+                if (g != 0) {
+                    break;
+                }
+
+                if(board.isBetweenTurnstiles(p, left, right)) {
+                    wall = new Particle(-1, p.getX(), Board.getYPadding() + board.getQueueLength(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p, wall);
+                    bounce = true;
+                } else if(board.collidesLeftSeparatorWall(p, current)) {
+                    wall = new Particle(-1, current.x, p.getY(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p, wall);
+                    bounce = true;
+                } else if(board.collidesRightSeparatorWall(p, current)) {
+                    wall = new Particle(-1, current.x + current.width, p.getY(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p, wall);
+                    bounce = true;
+                } else if(board.isInTurnstileDoor(p) && current.isLocked()) {
+                    //zona molinete
+                    //tiene que rebotar como si fuera la pared porque esta siendo usado
+                    wall = new Particle(-1, p.getX(), Board.getYPadding(), 0.0, 0.0,
+                            0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+                    g = calculateOverlap(p,wall);
+                    bounce = true;
+                } else if(board.isInTurnstileDoor(p) && !current.isLocked()) {
+                    // Entering turnstile
+                    current.lockTurnstile(p, time);
+                    bounce = true;
+                }
+            }
+        } else if (board.collidesLeftWall(p)) {
+            wall = new Particle(-1, Board.getXPadding(), p.getY(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
+        } else if (board.collidesRightWall(p)) {
+            wall = new Particle(-1, board.getL() - Board.getXPadding(), p.getY(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
+        } else if (board.collidesUpperWall(p)) {
+            wall = new Particle(-1, p.getX(), board.getL() - Board.getYPadding(), 0.0, 0.0,
+                    0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
+            g = calculateOverlap(p, wall);
+        }
+
+        niw = p.getNij(wall);
+        tiw = p.getTangentVector(wall);
+
+        var prod = p.getVx() * tiw[0] + p.getVy() * tiw[1];
+        var exp = A * Math.exp((p.getRadius() - p.centerDistanceTo(wall)) / B);
+
+        double[] fn = new double[]{kn * g * niw[0], kn * g * niw[1]};
+        double[] ft = {kt * g * prod * tiw[0], kt * g * prod * tiw[1]};
+
+        return new double[]{fn[0] + ft[0] + exp * niw[0], fn[1] + ft[1] + exp * niw[1]};
+    }
+
+    private double calculateCornerForce(Particle p, Turnstile t) {
+        Particle wall;
+        double g;
+        //punta izquierda
+        wall = new Particle(-1, t.x, t.y + board.getQueueLength(), 0.0, 0.0,
+                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+        g = calculateOverlap(p, wall);
+        if(g != 0) {
+            return g;
+        }
+
+        //punta derecha
+        wall = new Particle(-1,t.x + t.width, t.y + board.getQueueLength(), 0.0, 0.0,
+                0.0, new double[]{0.0, 0.0}, 0.0, 0.02);
+        g = calculateOverlap(p, wall);
+        return g;
     }
 
     private double[] calculateWallForce(final Particle p, final double time) {
