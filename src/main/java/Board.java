@@ -27,10 +27,11 @@ public class Board {
     private List<Particle> particles;
     private List<Particle> assignableParticles;
     private SFM sfm;
+    private final double queueLength;
 
     public Board(double l, double d, int turnstiles, double transactionTime,
                  double minR, double maxR, double minV, double maxV,
-                 double Ve, int m, List<Particle> particles) {
+                 double Ve, int m, List<Particle> particles, double queueLength) {
         L = l;
         this.minR = minR;
         this.maxR = maxR;
@@ -38,6 +39,7 @@ public class Board {
         this.maxV = maxV;
         this.Ve = Ve;
         this.doorWidth = d;
+        this.queueLength = queueLength;
         this.turnstiles = new ArrayList<>(turnstiles);
         this.assignableParticles = new ArrayList<>();
         this.dt = 0.0028;//Math.round(Math.sqrt(60.0 / 120000) / 8, 4);
@@ -177,13 +179,13 @@ public class Board {
 
     public static Board getRandomBoard(int n, double d, int turnstiles, double transactionTime, double l,
                                        int m, double minR, double maxR, double minV, double maxV, double vd,
-                                       double ve,double maxMass) {
+                                       double ve,double maxMass, double queueLength) {
 
         List<Particle> particles = new ArrayList<>();
 
         double x, y, radius;
         double[] vel;
-        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, minV, maxV, ve, m, new ArrayList<>());
+        Board board = new Board(l, d, turnstiles, transactionTime, minR, maxR, minV, maxV, ve, m, new ArrayList<>(), queueLength);
         var sfm = new SFM(1.2E5, 2.4E5, 2000, 0.08, 0.5, board);
         board.setSfm(sfm);
 
