@@ -20,6 +20,7 @@ public class OutputData {
     private final double densityAnalysisY;
     private final int simulation;
     private final double spaceBetweenTurnstiles;
+    private int dummiesParticleCount;
 
 
 
@@ -85,12 +86,12 @@ public class OutputData {
     } */
 
     public void writeBoardToFile(List<List<ParticleOutputData>> states) throws IOException {
-        var dummyParticlesSize = (int) (8 + board.getTurnstiles().size()*(4+2*board.getQueueLength()/0.1) + (board.getTurnstiles().size()+2)*spaceBetweenTurnstiles/0.1 + 1);
+        //var dummyParticlesSize = 8 + board.getTurnstiles().size()*(4+2*((int) board.getQueueLength()/0.1)) + (int) ((board.getTurnstiles().size()+2)*spaceBetweenTurnstiles/0.1);
         for(List<ParticleOutputData> particles : states) {
-            particlesFw.write(String.valueOf(particles.size() + dummyParticlesSize));
-            particlesFw.write('\n');
-            particlesFw.write('\n');
-            writeDummyParticles();
+            var dummies = writeDummyParticles();
+            particlesFw.write(String.valueOf(particles.size() + dummiesParticleCount));
+            particlesFw.write("\n\n");
+            particlesFw.write(dummies);
             for(OutputData.ParticleOutputData p : particles) {
                 particlesFw.write(p.getId() + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius() + " 255 255 0");
                 particlesFw.write('\n');
@@ -101,7 +102,55 @@ public class OutputData {
         states.clear();
     }
 
-    private void writeDummyParticles() throws IOException {
+    private String writeDummyParticles() throws IOException {
+        
+        dummiesParticleCount = 8;
+        var dataDummies = "10001 0 0 0 0 0.0001 255 255 255\n";
+        dataDummies = dataDummies.concat("10002 "+board.getL()+" 0 0 0 0.0001 255 255 255\n");
+        dataDummies = dataDummies.concat("10003 0 "+board.getL()+" 0 0 0.0001 255 255 255\n");
+        dataDummies = dataDummies.concat("10004 "+board.getL()+" "+board.getL()+" 0 0 0.0001 255 255 255\n");
+        dataDummies = dataDummies.concat("10005 "+Board.getXPadding()+" "+Board.getYPadding()+" 0 0 0.05 255 255 255\n");
+        dataDummies = dataDummies.concat("10006 "+(board.getL()-Board.getXPadding())+" "+Board.getYPadding()+" 0 0 0.05 255 255 255\n");
+        dataDummies = dataDummies.concat("10007 "+Board.getXPadding()+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05 255 255 255\n");
+        dataDummies = dataDummies.concat("10008 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05 255 255 255\n");
+
+        double s = 0;
+        while (s <= spaceBetweenTurnstiles) {
+            int k = (int)(s*10);
+            dataDummies = dataDummies.concat((-40000-(2^100)*3^k) + " " + (Board.getXPadding()+s) +" "+(board.getTurnstiles().get(0).getY()+board.getQueueLength())+" 0 0 0.1 255 255 255\n");
+            dummiesParticleCount++;
+            s += 0.1;
+        }
+
+        for (int i = 0; i < board.getTurnstiles().size(); i++) {
+            var t = board.getTurnstiles().get(i);
+            dataDummies = dataDummies.concat((-1000-i)+ " " + t.getX() +" 0 0 0 0.1 255 255 255\n");
+            dataDummies = dataDummies.concat((-2000-i)+ " " + t.getX() +" "+t.getY()+" 0 0 0.1 255 255 255\n");
+            dataDummies = dataDummies.concat((-3000-i)+ " " + (t.getX()+t.getWidth()) +" 0 0 0 0.1 255 255 255\n");
+            dataDummies = dataDummies.concat((-4000-i)+ " " + (t.getX()+t.getWidth()) +" "+t.getY()+" 0 0 0.1 255 255 255\n");
+            dummiesParticleCount += 4;
+            
+            double j = 0;
+            while (j <= board.getQueueLength()) {
+                int k = (int) (j*10);
+                dataDummies = dataDummies.concat((-10000-2^i*3^k)+ " " + t.getX() +" "+(t.getY()+j)+" 0 0 0.1 255 255 255\n");
+                dataDummies = dataDummies.concat((-20000-2^i*3^k)+ " " + (t.getX()+t.getWidth()) +" "+(t.getY()+j)+" 0 0 0.1 255 255 255\n");
+                dummiesParticleCount += 2;
+                j += 0.1;
+            }
+
+            s = 0;
+            while (s <= spaceBetweenTurnstiles) {
+                int k = (int)(s*10);
+                dataDummies = dataDummies.concat((-30000-2^i*3^k)+ " " + (t.getX()+t.getWidth()+s) +" "+(t.getY()+j)+" 0 0 0.1 255 255 255\n");
+                dummiesParticleCount++;
+                s += 0.1;
+            }
+        }
+
+        return dataDummies;
+
+        /*
         particlesFw.write("10001 0 0 0 0 0.0001 255 255 255");
         particlesFw.write('\n');
         particlesFw.write("10002 "+board.getL()+" 0 0 0 0.0001 255 255 255");
@@ -118,14 +167,12 @@ public class OutputData {
         particlesFw.write('\n');
         particlesFw.write("10008 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05 255 255 255");
         particlesFw.write('\n');
-
         double s = 0;
         while (s <= spaceBetweenTurnstiles) {
-            particlesFw.write((-30000-2^100*3^(int)(s*10)) + " " + (Board.getXPadding()+s) +" "+(board.getTurnstiles().get(0).getY()+board.getQueueLength())+" 0 0 0.1 255 255 255");
+            particlesFw.write((-40000-2^100*3^(int)(s*10)) + " " + (Board.getXPadding()+s) +" "+(board.getTurnstiles().get(0).getY()+board.getQueueLength())+" 0 0 0.1 255 255 255");
             particlesFw.write('\n');
             s += 0.1;
         }
-
         for(int i = 0; i < board.getTurnstiles().size(); i++){
             var t = board.getTurnstiles().get(i);
             particlesFw.write((-1000-i)+ " " + t.getX() +" 0 0 0 0.1 255 255 255");
@@ -157,6 +204,7 @@ public class OutputData {
 
 
         }
+        * */
     }
 
     /*private void writeDensityFile(List<List<ParticleOutputData>> states) throws IOException {
