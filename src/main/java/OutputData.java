@@ -19,6 +19,8 @@ public class OutputData {
     private final FileWriter particlesFw;
     private final double densityAnalysisY;
     private final int simulation;
+    private final double spaceBetweenTurnstiles;
+
 
 
     public OutputData(final Board board, final int simulationNumber) throws IOException {
@@ -28,7 +30,7 @@ public class OutputData {
         this.board = board;
         this.densityAnalysisY = 0.25*board.getRealHeight();
         this.particlesFw = new FileWriter("particles.xyz");
-
+        this.spaceBetweenTurnstiles = (board.getRealWidth() - board.getTurnstiles().size() * board.getDoorWidth()) / (board.getTurnstiles().size()+1);
 
     }
 
@@ -81,14 +83,14 @@ public class OutputData {
     } */
 
     public void writeBoardToFile(List<List<ParticleOutputData>> states) throws IOException {
-        var dummyParticlesSize = 8 + board.getTurnstiles().size()*4;
+        var dummyParticlesSize = (int) (8 + board.getTurnstiles().size()*(4+2*board.getQueueLength()/0.1) + (board.getTurnstiles().size()+2)*spaceBetweenTurnstiles/0.1 + 1);
         for(List<ParticleOutputData> particles : states) {
             particlesFw.write(String.valueOf(particles.size() + dummyParticlesSize));
             particlesFw.write('\n');
             particlesFw.write('\n');
             writeDummyParticles();
             for(OutputData.ParticleOutputData p : particles) {
-                particlesFw.write(p.getId() + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius());
+                particlesFw.write(p.getId() + " " + p.getX() + " " + p.getY() + " " + p.getVx() + " " + p.getVy() + " " + p.getRadius() + " 255 255 0");
                 particlesFw.write('\n');
             }
         }
@@ -98,33 +100,60 @@ public class OutputData {
     }
 
     private void writeDummyParticles() throws IOException {
-        particlesFw.write("201 0 0 0 0 0.0001");
+        particlesFw.write("10001 0 0 0 0 0.0001 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("202 "+board.getL()+" 0 0 0 0.0001");
+        particlesFw.write("10002 "+board.getL()+" 0 0 0 0.0001 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("203 0 "+board.getL()+" 0 0 0.0001");
+        particlesFw.write("10003 0 "+board.getL()+" 0 0 0.0001 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("204 "+board.getL()+" "+board.getL()+" 0 0 0.0001");
+        particlesFw.write("10004 "+board.getL()+" "+board.getL()+" 0 0 0.0001 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("214 "+Board.getXPadding()+" "+Board.getYPadding()+" 0 0 0.05");
+        particlesFw.write("10005 "+Board.getXPadding()+" "+Board.getYPadding()+" 0 0 0.05 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("215 "+(board.getL()-Board.getXPadding())+" "+Board.getYPadding()+" 0 0 0.05");
+        particlesFw.write("10006 "+(board.getL()-Board.getXPadding())+" "+Board.getYPadding()+" 0 0 0.05 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("216 "+Board.getXPadding()+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
+        particlesFw.write("10007 "+Board.getXPadding()+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05 255 255 255");
         particlesFw.write('\n');
-        particlesFw.write("217 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05");
+        particlesFw.write("10008 "+(board.getL()-Board.getXPadding())+" "+(board.getL()-Board.getYPadding())+" 0 0 0.05 255 255 255");
         particlesFw.write('\n');
+
+        double s = 0;
+        while (s <= spaceBetweenTurnstiles) {
+            particlesFw.write((-30000-2^100*3^(int)(s*10)) + " " + (Board.getXPadding()+s) +" "+(board.getTurnstiles().get(0).getY()+board.getQueueLength())+" 0 0 0.1 255 255 255");
+            particlesFw.write('\n');
+            s += 0.1;
+        }
 
         for(int i = 0; i < board.getTurnstiles().size(); i++){
             var t = board.getTurnstiles().get(i);
-            particlesFw.write((-1-4*i)+ " " + t.getX() +" 0 0 0 0.1");
+            particlesFw.write((-1000-i)+ " " + t.getX() +" 0 0 0 0.1 255 255 255");
             particlesFw.write('\n');
-            particlesFw.write((-2-4*i)+ " " + t.getX() +" "+t.getY()+" 0 0 0.1");
+            particlesFw.write((-2000-i)+ " " + t.getX() +" "+t.getY()+" 0 0 0.1 255 255 255");
             particlesFw.write('\n');
-            particlesFw.write((-3-4*i)+ " " + (t.getX()+t.getWidth()) +" 0 0 0 0.1");
+            particlesFw.write((-3000-i)+ " " + (t.getX()+t.getWidth()) +" 0 0 0 0.1 255 255 255");
             particlesFw.write('\n');
-            particlesFw.write((-4-4*i)+ " " + (t.getX()+t.getWidth()) +" "+t.getY()+" 0 0 0.1");
+            particlesFw.write((-4000-i)+ " " + (t.getX()+t.getWidth()) +" "+t.getY()+" 0 0 0.1 255 255 255");
             particlesFw.write('\n');
+
+            double j = 0;
+            while (j <= board.getQueueLength()) {
+                System.out.println("queue wall i: "+i+" j: "+j);
+                int k = (int) (j*10);
+                particlesFw.write((-10000-2^i*3^k)+ " " + t.getX() +" "+(t.getY()+j)+" 0 0 0.1 255 255 255");
+                particlesFw.write('\n');
+                particlesFw.write((-20000-2^i*3^k)+ " " + (t.getX()+t.getWidth()) +" "+(t.getY()+j)+" 0 0 0.1 255 255 255");
+                particlesFw.write('\n');
+                j += 0.1;
+            }
+
+            s = 0;
+            while (s <= spaceBetweenTurnstiles) {
+                particlesFw.write((-30000-2^i*3^(int)(s*10))+ " " + (t.getX()+t.getWidth()+s) +" "+(t.getY()+j)+" 0 0 0.1 255 255 255");
+                particlesFw.write('\n');
+                s += 0.1;
+            }
+
+
         }
     }
 
