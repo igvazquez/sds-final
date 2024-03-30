@@ -11,7 +11,7 @@ public class Board {
     public static final double TARGET_TRIM = 0.2;
     public static final double X_PADDING = 5.0;
     public static final double Y_PADDING = 2.0;
-    public static final double DOOR_CORNER_R = 0.04;
+    public static final double DOOR_CORNER_R = 0.02;
 
     private final double L;
     private final double minR;
@@ -43,7 +43,7 @@ public class Board {
         this.queueLength = queueLength;
         this.turnstiles = new ArrayList<>(turnstiles);
         this.assignableParticles = new ArrayList<>();
-        this.dt = 0.0028;//Math.round(Math.sqrt(60.0 / 120000) / 8, 4);
+        this.dt = 0.0028;//0.0007;//Math.round(Math.sqrt(60.0 / 120000) / 8, 4);
         this.referenceDt = minR / (2 * Math.max(maxV, Ve));
         M = m;
         this.cells = new HashMap<>();
@@ -95,10 +95,16 @@ public class Board {
     }
 
     public boolean collidesLeftSeparatorWall(final Particle p, final Turnstile t) {
+        if(!isWithinTurnstile(p, t)) {
+            return false;
+        }
         return p.getX() - p.getRadius() <= t.x;
     }
 
     public boolean collidesRightSeparatorWall(final Particle p, final Turnstile t) {
+        if(!isWithinTurnstile(p, t)) {
+            return false;
+        }
         return p.getX() + p.getRadius() >= t.x + t.width;
     }
 
@@ -106,7 +112,10 @@ public class Board {
         return p.getX() + p.getRadius() >= getL() - getXPadding();
     }
 
-    public boolean isInTurnstileDoor(final Particle p) {
+    public boolean isInTurnstileDoor(final Particle p, final Turnstile t) {
+        if(!isWithinTurnstile(p, t)) {
+            return false;
+        }
         return p.getY() - p.getRadius() <= getYPadding();
     }
 
@@ -124,7 +133,7 @@ public class Board {
     }
 
     public boolean isInSeparatorArea(final Particle p) {
-        return p.getY() - p.getRadius() <= getYPadding() + queueLength + 2 * Board.DOOR_CORNER_R;
+        return p.getY() - p.getRadius() <= getYPadding() + queueLength;
     }
 
     public boolean isWithinTurnstile(Particle p, Turnstile t) {
@@ -215,7 +224,7 @@ public class Board {
         for (i = 0; i < n; i++) {
             do {
                 x = X_PADDING + Math.random() * (l-2*X_PADDING);
-                y = Y_PADDING + queueLength + Math.random() * (l-2*Y_PADDING);
+                y = Y_PADDING + queueLength + maxR + Math.random() * (l-2*Y_PADDING);
                 radius = ThreadLocalRandom.current().nextDouble(minR, maxR);
             } while (overlap(x, y, radius, l, particles));
 
