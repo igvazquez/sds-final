@@ -51,13 +51,13 @@ public class SFM {
         return a;
     }
 
-    private static double wallCheat(double magnitudeInsideWall) {
-        return Math.abs(magnitudeInsideWall) > 0.001 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.00001 : magnitudeInsideWall;
+    private static double wallFix(double magnitudeInsideWall) {
+        return Math.abs(magnitudeInsideWall) > 0.01 ? (Math.abs(magnitudeInsideWall) / magnitudeInsideWall) * 0.01 : magnitudeInsideWall;
     }
 
     private double calculateOverlap(Particle p, Particle other) {
         return Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()) > p.getRadius() + other.getRadius()
-                ? 0 : wallCheat(p.getRadius() + other.getRadius() - Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()));
+                ? 0 : wallFix(p.getRadius() + other.getRadius() - Math.hypot(p.getX() - other.getX(), p.getY() - other.getY()));
     }
 
     private double[] calculateWallForce2(final Particle p, final double time) {
@@ -86,19 +86,23 @@ public class SFM {
                 //choque con puntas de current
                 //punta izquierda
                 wall = new Particle(-1, current.x, current.y + board.getQueueLength(), 0.0, 0.0,
-                        0.0, new double[]{0.0, 0.0}, 0.0, 0.00001);
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                 g = calculateOverlap(p, wall);
                 if(g != 0) {
                     break;
                 }
+                wall = new Particle(-1, 0, 0, 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
 
                 //punta derecha
                 wall = new Particle(-1,current.x + current.width, current.y + board.getQueueLength(), 0.0, 0.0,
-                        0.0, new double[]{0.0, 0.0}, 0.0, 0.00001);
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                 g = calculateOverlap(p, wall);
                 if (g != 0) {
                     break;
                 }
+                wall = new Particle(-1, 0, 0, 0.0, 0.0,
+                        0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
 
                 if(board.isBetweenTurnstiles(p, left, right)) {
                     wall = new Particle(-1, p.getX(), Board.getYPadding() + board.getQueueLength(), 0.0, 0.0,
@@ -155,10 +159,30 @@ public class SFM {
         double[] fn = new double[]{kn * g * niw[0], kn * g * niw[1]};
         double[] ft = {kt * g * prod * tiw[0], kt * g * prod * tiw[1]};
 
-        return new double[]{fn[0] + ft[0] + exp * niw[0], fn[1] + ft[1] + exp * niw[1]};
+        double f1 = fn[0] + ft[0] + exp * niw[0];
+        double f2 = fn[1] + ft[1] + exp * niw[1];
+
+        //return new double[]{fn[0] + ft[0] + exp * niw[0], fn[1] + ft[1] + exp * niw[1]};
+        return forceFix(p, wall, f1, f2);
     }
 
-    private double[] calculateWallForce(final Particle p, final double time) {
+    private double[] forceFix(Particle p, Particle wall, double f1, double f2) {
+        double overlap = p.getRadius() + wall.getRadius() - Math.hypot(p.getX() - wall.getX(), p.getY() - wall.getY());
+        double limit = 1400.0;
+        double hardLimit = 200.0;
+        if(overlap > 0.035) {
+            return new double[]{
+                    Math.abs(f1) > limit ? Math.signum(f1) * hardLimit : f1,
+                    Math.abs(f2) > limit ? Math.signum(f2) * hardLimit : f2
+            };
+        }
+        return new double[]{
+                Math.abs(f1) > limit ? Math.signum(f1) * limit : f1,
+                Math.abs(f2) > limit ? Math.signum(f2) * limit : f2
+        };
+    }
+
+    /*private double[] calculateWallForce(final Particle p, final double time) {
         double g = 0;
         double[] niw;
         double[] tiw;
@@ -235,7 +259,7 @@ public class SFM {
         double[] ft = {kt * g * prod * tiw[0], kt * g * prod * tiw[1]};
 
         return new double[]{fn[0] + ft[0] + exp * niw[0], fn[1] + ft[1] + exp * niw[1]};
-    }
+    } */
 
     public double[] getForce(final Particle p, final Set<Particle> neighbours, final double time) {
         var a = getAcceleration(p, neighbours, time);

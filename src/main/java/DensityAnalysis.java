@@ -6,10 +6,10 @@ public class DensityAnalysis {
 
         var simulations = 1;
         var iterations = 20000;
-        int n = 200;
+        int n = 50;
         double d = 1.0;
         double l = 50;
-        int turnstiles = 20;
+        int turnstiles = 5;
         double minR = 0.25;
         double maxR = 0.4;
         double m = 70;
