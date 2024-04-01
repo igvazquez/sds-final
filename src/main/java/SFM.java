@@ -168,10 +168,14 @@ public class SFM {
 
     private double[] forceFix(Particle p, Particle wall, double f1, double f2) {
         double overlap = p.getRadius() + wall.getRadius() - Math.hypot(p.getX() - wall.getX(), p.getY() - wall.getY());
-        double limit = 1300.0;
-        double hardLimit = 100.0;
+        double limit = 2300.0;
+        double hardLimit = 170.0;
 
-        if(overlap > 0.1) {
+        /*if(p.getY() < Board.Y_PADDING + 0.7 * board.getQueueLength()) {
+            return new double[]{f1, f2};
+        }*/
+
+        if(overlap > 0.17) {
             return new double[]{0.0, 0.0};
         }
         else if(overlap > 0.025) {
