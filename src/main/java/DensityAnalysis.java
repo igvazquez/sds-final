@@ -6,18 +6,18 @@ public class DensityAnalysis {
 
         var simulations = 1;
         var iterations = 20000;
-        int n = 50;
+        int n = 70;
         double d = 1.0;
         double l = 50;
         int turnstiles = 5;
-        double minR = 0.25;
-        double maxR = 0.4;
+        double minR = 0.3;
+        double maxR = 0.45;
         double m = 70;
         double minV = 1.0;
         double maxV = 1.0;
         double transactionTime = 1.0;
         double decisionPoint = 0.4*l;
-        double queueLength = 3.5;
+        double queueLength = 4.5;
 
         boolean completed;
         int broken = 0;

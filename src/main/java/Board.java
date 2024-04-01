@@ -59,7 +59,7 @@ public class Board {
         }
         var turnstilePadding = (L - 2*X_PADDING - t*doorWidth)/(t+1);
         for (int i = 0; i < t; i++) {
-            turnstiles.add(new Turnstile(X_PADDING + (i+1)*turnstilePadding + i*doorWidth, Y_PADDING, 1.5, doorWidth, transactionTime));
+            turnstiles.add(new Turnstile(X_PADDING + (i+1)*turnstilePadding + i*doorWidth, Y_PADDING, 1.5, doorWidth));
         }
     }
 
@@ -197,7 +197,7 @@ public class Board {
                                     Comparator.comparingInt(List::size))).get();
                     //poner target a la particula, asignar particula a molinete
                     free.targeted.add(p);
-                    target = new double[]{free.getX() + free.getWidth()/2, Y_PADDING};
+                    target = new double[]{free.getX() + free.getWidth()/2, Y_PADDING + queueLength * 0.7};
                     p.setTurnstileTargeted(turnstiles.indexOf(free));
                 }
                 vel = calculateVelocityToTarget(p.vx, p.vy, p.getX(), p.getY(), target);

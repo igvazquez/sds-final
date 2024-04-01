@@ -28,7 +28,7 @@ public class SFM {
 
         Fd = calculateDesireForce(p);
 
-        if(!p.isLocked()){
+        if(!p.isLocked()) {
             var wallFg = calculateWallForce2(p, time);
             Fg[0] += wallFg[0];
             Fg[1] += wallFg[1];
@@ -76,10 +76,10 @@ public class SFM {
                 //estos 2 son para muros entre molinetes
                 Turnstile left = i != 0 ? board.getTurnstiles().get(i - 1) :
                         new Turnstile(Board.X_PADDING + (-1 + 1) * turnstilePadding + -1 * board.getDoorWidth(),
-                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                                Board.Y_PADDING, 1.5, board.getDoorWidth());
                 Turnstile right = i != t ? board.getTurnstiles().get(i) :
                         new Turnstile(Board.X_PADDING + (i + 1) * turnstilePadding + i * board.getDoorWidth(),
-                                Board.Y_PADDING, 1.5, board.getDoorWidth(), 0.0);
+                                Board.Y_PADDING, 1.5, board.getDoorWidth());
                 //este es para evaluar si dentro del area molinete
                 Turnstile current = i != t ? right : left;
 
@@ -116,7 +116,7 @@ public class SFM {
                             0.0, new double[]{0.0, 0.0}, 0.0, 0.0);
                     g = calculateOverlap(p,wall);
                     bounce = true;
-                } else if(board.isInTurnstileDoor(p, current) && !current.isLocked()) {
+                } else if(board.isInTurnstileDoor(p, current) && !current.isLocked() && !p.payed) {
                     // Entering turnstile
                     current.lockTurnstile(p, time);
                     bounce = true;
@@ -168,9 +168,13 @@ public class SFM {
 
     private double[] forceFix(Particle p, Particle wall, double f1, double f2) {
         double overlap = p.getRadius() + wall.getRadius() - Math.hypot(p.getX() - wall.getX(), p.getY() - wall.getY());
-        double limit = 1400.0;
-        double hardLimit = 200.0;
-        if(overlap > 0.035) {
+        double limit = 1300.0;
+        double hardLimit = 100.0;
+
+        if(overlap > 0.1) {
+            return new double[]{0.0, 0.0};
+        }
+        else if(overlap > 0.025) {
             return new double[]{
                     Math.abs(f1) > limit ? Math.signum(f1) * hardLimit : f1,
                     Math.abs(f2) > limit ? Math.signum(f2) * hardLimit : f2

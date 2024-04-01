@@ -15,6 +15,7 @@ public class Particle {
     double mass;
     double radius;
     boolean locked;
+    boolean payed;
     int turnstileTargeted;
     Verlet integrator;
 
@@ -31,6 +32,7 @@ public class Particle {
         this.mass = mass;
         this.radius = radius;
         this.locked = false;
+        this.payed = false;
     }
 
     public Particle(int id, double x, double y, double vx, double vy,
@@ -103,12 +105,14 @@ public class Particle {
     }
 
     public void advanceParticle(double t, final double dt, final Set<Particle> neighbours) {
-        var newState = integrator.step(t, dt, neighbours);
+        if(!locked) {
+            var newState = integrator.step(t, dt, neighbours);
 
-        x = newState[0].getR();
-        vx = newState[0].getV();
-        y = newState[1].getR();
-        vy = newState[1].getV();
+            x = newState[0].getR();
+            vx = newState[0].getV();
+            y = newState[1].getR();
+            vy = newState[1].getV();
+        }
     }
 
     @Override
