@@ -2,8 +2,20 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.stats import sem
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import matplotlib.pyplot as plt
+
+
+# Configure default font sizes
+plt.rcParams.update({
+    'font.size': 14,         # Default text size
+    'axes.titlesize': 16,    # Title font size
+    'axes.labelsize': 14,    # X and Y axis labels font size
+    'xtick.labelsize': 12,   # X tick labels font size
+    'ytick.labelsize': 12,   # Y tick labels font size
+    'legend.fontsize': 14,   # Legend font size
+    'figure.titlesize': 18   # Figure title font size
+})
 
 
 def manual_window(df: pd.DataFrame, window_size: int) -> Tuple[List[float], List[float]]:
@@ -16,16 +28,40 @@ def manual_window(df: pd.DataFrame, window_size: int) -> Tuple[List[float], List
     return Q, t
 
 
-def gtp_window(df: pd.DataFrame, window_size: int) -> pd.DataFrame:
+def gtp_window(
+        df: pd.DataFrame,
+        window_size: int,
+        start_time: Optional[str] = None,
+        end_time: Optional[str] = None,
+        start_row: Optional[int] = None,
+        end_row: Optional[int] = None
+) -> pd.DataFrame:
+    # Filter by time if start_time and end_time are provided
+    if start_time and end_time:
+        mask = (df['time'] >= start_time) & (df['time'] <= end_time)
+        df_filtered = df.loc[mask]
+    elif start_row is not None and end_row is not None:
+        # Filter by row index if start_row and end_row are provided
+        df_filtered = df.iloc[start_row:end_row]
+    else:
+        # If no filters are provided, use the entire DataFrame
+        df_filtered = df
+
     # Set the time column as the index
-    df.set_index('time', inplace=True)
+    df_filtered.set_index('time', inplace=True)
+
     # Calculate the windowed average of the quotient of "particles" and "time"
-    Q = (df['escaped'] / df.index).rolling(window=window_size, min_periods=math.ceil(window_size/4)).mean().reset_index()
+    Q = (df_filtered['escaped'] / df_filtered.index).rolling(window=window_size, min_periods=math.ceil(
+        window_size / 4)).mean().reset_index()
+
     # Reset the index if needed
-    df.reset_index(inplace=True)
+    df_filtered.reset_index(inplace=True)
+
+    # Create the result DataFrame
     Q_t = pd.DataFrame(columns=['time', 'Q'])
-    Q_t['time'] = df['time']
+    Q_t['time'] = df_filtered['time']
     Q_t['Q'] = Q[Q.columns[1]]
+
     return Q_t
 
 

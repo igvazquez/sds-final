@@ -52,7 +52,7 @@ if multiple_n_values:
         os.mkdir(dir_path)
 
     plot_multiple_time_series(data_list=nt_list, x_label=r'$t$ (s)', y_label=r'Descarga: n(t)', filename=user_path+"changeN/plots/old/"+decision_type+"/n_t")
-    plot_multiple_time_series(data_list=qt_list, x_label=r'$t$ (s)', y_label=r'Descarga: Q(t)', filename=user_path+"changeN/plots/old/"+decision_type+"/q_t")
+    plot_multiple_time_series(data_list=qt_list, x_label=r'$t$ (s)', y_label=r'Caudal: Q(t)', filename=user_path+"changeN/plots/old/"+decision_type+"/q_t")
     plot_means(series_list=qt_list, filename=user_path+"changeN/plots/old/"+decision_type+"/q_means", xlabel="N", ylabel="Caudal medio <Q(t)> (1/s)")
     plot_escape_time(series_list=t_list, filename=user_path+"changeN/plots/old/"+decision_type+"/escape_time", xlabel="N", ylabel="Tiempo de escape (s)")
 
