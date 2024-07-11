@@ -31,6 +31,9 @@ public class Board {
     private SFM sfm;
     private final double queueLength;
 
+    private final List<Wall> walls;
+
+
     public Board(double l, double d, int turnstiles, double transactionTime,
                  double minR, double maxR, double minV, double maxV,
                  double Ve, int m, List<Particle> particles, double queueLength) {
@@ -50,7 +53,33 @@ public class Board {
         M = m;
         this.cells = new HashMap<>();
         generateTurnstiles(turnstiles, transactionTime);
+        this.walls = generateWalls();
         sortBoard(particles);
+    }
+
+    private List<Wall> generateWalls() {
+        List<Wall> walls = new ArrayList<>();
+         //muro arriba
+        walls.add(new Wall(X_PADDING, L - Y_PADDING, L - X_PADDING, L - Y_PADDING));
+        //muro derecha
+        walls.add(new Wall(L - X_PADDING, Y_PADDING, L - X_PADDING, L - Y_PADDING));
+        //muro izquierda
+        walls.add(new Wall(X_PADDING, Y_PADDING, X_PADDING, L - Y_PADDING));
+
+        var turnstilePadding = (L - 2*X_PADDING - turnstiles.size()*doorWidth)/(turnstiles.size()+1);
+        for (int i = 0; i < turnstiles.size(); i++) {
+            Turnstile t = turnstiles.get(i);
+            //muro horizontal hacia izq
+            walls.add(new Wall(t.x - turnstilePadding, t.y + queueLength, t.x, t.y + queueLength));
+            //muro vertical izq
+            walls.add(new Wall(t.x, t.y, t.x, t.y + queueLength));
+            //muro vertical der
+            walls.add(new Wall(t.x + t.getWidth(), t.y, t.x + t.getWidth(), t.y + queueLength));
+        }
+        Turnstile last = turnstiles.get(turnstiles.size() - 1);
+        //muro horizontal a la derecha del ultimo
+        walls.add(new Wall(last.x + last.getWidth(), last.y + queueLength, L - X_PADDING, last.y + queueLength));
+        return walls;
     }
 
     private void generateTurnstiles(final int t, final double transactionTime) {
@@ -59,7 +88,7 @@ public class Board {
         }
         var turnstilePadding = (L - 2*X_PADDING - t*doorWidth)/(t+1);
         for (int i = 0; i < t; i++) {
-            turnstiles.add(new Turnstile(X_PADDING + (i+1)*turnstilePadding + i*doorWidth, Y_PADDING, 1.5, doorWidth));
+            turnstiles.add(new Turnstile(X_PADDING + (i + 1) * turnstilePadding + i * doorWidth, Y_PADDING, 1.5, doorWidth));
         }
     }
 

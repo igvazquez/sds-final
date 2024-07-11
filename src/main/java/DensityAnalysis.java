@@ -6,10 +6,10 @@ public class DensityAnalysis {
 
         var simulations = 1;
         var iterations = 20000;
-        int n = 70;
+        int n = 1;
         double d = 1.0;
         double l = 50;
-        int turnstiles = 5;
+        int turnstiles = 3;
         double minR = 0.35;
         double maxR = 0.45;
         double m = 70;
@@ -34,7 +34,7 @@ public class DensityAnalysis {
             if(completed) {
 //                OutputData.writeSimulation(simulation, "output/transactionTime/t10/");
 //                OutputData.writeSimulation(simulation, "output/changeN/N"+n+"/");
-                OutputData.writeSimulation(simulation, "output/test/");
+                //OutputData.writeSimulation(simulation, "output/test/");
             } else {
                 broken++;
                 i--;

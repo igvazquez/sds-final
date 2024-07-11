@@ -21,6 +21,38 @@ public class SFM {
         this.board = board;
     }
 
+    public static double[] normalize(double[] v) {
+        double norm = Math.sqrt(dotProduct(v, v));
+        if (norm == 0) {
+            return v;
+        }
+        return new double[]{v[0] / norm, v[1] / norm};
+    }
+
+    public static double dotProduct(double[] a, double[] b) {
+        return a[0] * b[0] + a[1] * b[1];
+    }
+
+    public static double[] subtract(double[] a, double[] b) {
+        return new double[]{a[0] - b[0], a[1] - b[1]};
+    }
+
+    public static double[] multiply(double[] a, double scalar) {
+        return new double[]{a[0] * scalar, a[1] * scalar};
+    }
+
+    public static double[] add(double[] a, double[] b) {
+        return new double[]{a[0] + b[0], a[1] + b[1]};
+    }
+
+    public static double[] divide(double[] a, double scalar) {
+        return new double[]{a[0] / scalar, a[1] / scalar};
+    }
+
+    public static double g(double x) {
+        return Math.max(x, 0);
+    }
+
     public double[] getAcceleration(final Particle p, final Set<Particle> neighbours, final double time) {
         double[] Fg = new double[2];    // Granular Force
         double[] Fs = new double[2];    // Social Force

@@ -1,4 +1,6 @@
 import lombok.Data;
+
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,6 +21,13 @@ public class Particle {
     int turnstileTargeted;
     Verlet integrator;
 
+    private double bodyFactor;
+    private double F;
+    private double delta;
+    private double dSpeed;
+    private double acclTime;
+    private double[] dVelocity;
+
     public Particle(int id, double x, double y, double vx, double vy,
                     double vd, double[] target, double mass, double radius) {
         this.turnstileTargeted = -1;
@@ -33,6 +42,13 @@ public class Particle {
         this.radius = radius;
         this.locked = false;
         this.payed = false;
+
+        this.bodyFactor = 120000;
+        this.F = 2000;
+        this.delta = 0.08 * 50;
+        this.dSpeed = 12;
+        this.acclTime = 0.5;
+        this.dVelocity = SFM.multiply(getTargetVector(), this.dSpeed);
     }
 
     public Particle(int id, double x, double y, double vx, double vy,
@@ -106,7 +122,7 @@ public class Particle {
 
     public void advanceParticle(double t, final double dt, final Set<Particle> neighbours) {
         if(!locked) {
-            var newState = integrator.step(t, dt, neighbours);
+            var newState = integrator.fixedStep(t, dt, neighbours);
 
             x = newState[0].getR();
             vx = newState[0].getV();
@@ -126,5 +142,44 @@ public class Particle {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public double[] f_ij(Particle other) {
+        double r_ij = this.radius + other.radius;
+        double d_ij = Math.sqrt(SFM.dotProduct(SFM.subtract(this.pos(), other.pos()), SFM.subtract(this.pos(), other.pos())));
+        double[] e_ij = SFM.normalize(SFM.subtract(this.pos(), other.pos()));
+
+        return SFM.add(SFM.multiply(SFM.multiply(e_ij, this.F), Math.exp((r_ij - d_ij) / this.delta)),
+                SFM.multiply(SFM.multiply(e_ij, this.bodyFactor), SFM.g(r_ij - d_ij)));
+    }
+
+    public double[] f_ik_wall(Wall wall) {
+        double r_i = this.radius;
+        double[] result = wall.distanceAgentToWall(this.pos());
+        double d_iw = result[0];
+        double[] e_iw = Arrays.copyOfRange(result, 1, result.length);
+        return SFM.add(SFM.multiply(e_iw, -this.F * Math.exp((r_i - d_iw) / this.delta)),
+                SFM.multiply(SFM.multiply(e_iw, this.bodyFactor), SFM.g(r_i - d_iw)));
+    }
+
+    public double[] velocityForce() {
+        double[] deltaV = SFM.subtract(this.dVelocity, new double[]{vx, vy});
+        if (Arrays.equals(deltaV, new double[]{0, 0})) {
+            deltaV = new double[]{0, 0};
+        }
+        return SFM.multiply(deltaV, this.mass / this.acclTime);
+    }
+
+    double[] pos() {
+        return new double[]{x, y};
+    }
+
+    double[] aVelocity() {
+        return new double[]{vx, vy};
+    }
+
+    void setAVelocity(double[] v) {
+        vx = v[0];
+        vy = v[1];
     }
 }

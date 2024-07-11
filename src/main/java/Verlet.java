@@ -58,4 +58,35 @@ public class Verlet {
                                  final double dt, final double mass){
         return r0 - dt*v0 + (dt*dt/(2*mass))*f0;
     }
+
+    public State[] fixedStep(double t, final double dt, final Set<Particle> neighbours) {
+        var state = new State[2];
+        var targetVector = particle.getTargetVector();
+        particle.setDVelocity(SFM.multiply(targetVector, particle.getDSpeed()));
+
+        double[] aVelocityForce = particle.velocityForce();
+        double[] peopleInteraction = new double[]{0.0, 0.0};
+        double[] wallInteraction = new double[]{0.0, 0.0};
+
+        for (Particle other : neighbours) {
+            if (particle == other) continue;
+            double[] interaction = particle.f_ij(other);
+            peopleInteraction = SFM.add(peopleInteraction, interaction);
+        }
+
+        for (Wall wall : force.board.getWalls()) {
+            double[] interaction = particle.f_ik_wall(wall);
+            wallInteraction = SFM.add(wallInteraction, interaction);
+        }
+
+        double[] sumForce = SFM.add(SFM.add(aVelocityForce, peopleInteraction), wallInteraction);
+        double[] dv_dt = SFM.divide(sumForce, particle.getMass());
+        double[] v = SFM.add(particle.aVelocity(), SFM.multiply(dv_dt, dt));
+        double[] r = SFM.add(particle.pos(), SFM.multiply(particle.aVelocity(), dt));
+
+        state[0] = new State(r[0], v[0], t);
+        state[1] = new State(r[1], v[1], t);
+        return state;
+    }
+
 }
